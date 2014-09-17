@@ -75,6 +75,18 @@ def main():
     return render_template('main.html', units=units)
 
 
+@app.route('/registry')
+def registry():
+    units = Unit.query.all()
+    return jsonify({
+        'units': [{
+            'ip': unit.ip,
+            'id': unit.id,
+            'unit_type': unit.unit_type,
+        } for unit in units],
+    })
+
+
 @app.route('/units/<int:unit_id>', methods=['POST'])
 def update_unit(unit_id):
     unit = Unit.query.get_or_404(unit_id)
