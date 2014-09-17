@@ -55,3 +55,4 @@ target/
 
 hasas-db.sqlite
 venv
+.vagrant

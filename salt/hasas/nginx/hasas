@@ -1,0 +1,28 @@
+{% set hasas = pillar.get('hasas', {}) -%}
+{% set bind_url = hasas.get('bind_url', 'hasas.local') -%}
+
+upstream uwsgi {
+  least_conn;
+  server unix:///tmp/hasas.socket;
+}
+
+server {
+  listen 443;
+  server_name {{ bind_url }};
+  charset utf-8;
+  ssl on;
+  ssl_certificate ssl/hasas.crt;
+  ssl_certificate_key private/{{ bind_url }}.key;
+  add_header Strict-Transport-Security "max-age=31536000";
+
+  location / {
+    include uwsgi_params;
+
+    uwsgi_pass hasas;
+
+    uwsgi_param Host $host;
+    uwsgi_param X-Real-IP $remote_addr;
+    uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
+    uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
+  }
+}
