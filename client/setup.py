@@ -10,15 +10,15 @@ class Client(object):
         self.checkin_frequency = None
         self.priv_key = ".ssh/id_rsa"
         self.certificate = None
-        
+
         # Replace with NFC discovery ??
-        self.register_url = "http://78.91.3.162/register-unit"
+        self.register_url = "http://78.91.0.57/register-unit"
         self.checkin_url = None
 
         # Read config.ini
         with open('config.json') as config_fh:
             props = json.load( config_fh )
-        
+
         self.unit_type = props['unit_type']
         self.checkin_frequency = props['checkin_frequency']
 
@@ -33,7 +33,7 @@ class Client(object):
         }
         r = requests.post(self.register_url, data=payload)
         response = r.json()
-        
+
         self.certificate_url = response['certificate_url']
         self.checkin_url = response['checkin_url']
         self.id = response['id']
@@ -44,7 +44,7 @@ class Client(object):
     def collect_certificate(self, backoff_interval=1):
         if backoff_interval > 9 or backoff_interval < 1:
             return
-        
+
         for _ in xrange (backoff_interval):
             print "Requesting certificate from %s" % (self.certificate_url)
             r = requests.get(self.certificate_url)
@@ -58,15 +58,23 @@ class Client(object):
             self.collect_certificate(backoff_interval*2)
 
     def schedule_checkin(self):
+        backoff = 0
         while True:
             payload = {
                 'unit_id': self.id,
                 'readings': self.read()
             }
-            requests.post(self.checkin_url, data=payload)
+            # Throws error on timeout, must have fallback!
+            try:
+                requests.post(self.checkin_url, data=payload, timeout=5)
+                print "%s sent to %s" % (payload, self.checkin_url)
+                backoff = 0
+            except requests.exceptions.ConnectTimeout:
+                print "request timed out"
+                backoff += 1
 
-            print "%s sent to %s" % (payload, self.checkin_url)
-            time.sleep(self.checkin_frequency)
+            sleeptime = min(self.checkin_frequency * pow(2, backoff), 60*15)
+            time.sleep(sleeptime)
 
     def read(self):
         return [{
