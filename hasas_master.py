@@ -27,6 +27,8 @@ print('Running on %s' % my_ip)
 app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hasas-db.sqlite'
 app.config['SECRET_KEY'] = 'supersecret'
+app.config['SERVER_NAME'] = my_ip
+app.config['PREFERRED_URL_SCHEME'] = 'https'
 db = SQLAlchemy(app)
 
 
@@ -64,8 +66,9 @@ def register_unit():
     db.session.commit()
     return jsonify({
         'id': unit.id,
-        'checkin_url': 'http://%s/checkin' % my_ip,
-        'certificate_url': 'http://%s/certificates/%d.crt' % (my_ip, unit.id)
+        'checkin_url': url_for('unit_checkin', _external=True),
+        'certificate_url': url_for('certificate', unit_id=unit.id, _external=True),
+        'registry_url': url_for('registry', _external=True),
     })
 
 
