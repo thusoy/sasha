@@ -2,6 +2,7 @@ from flask import Flask, request, abort, render_template, flash, redirect, url_f
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import url_decode
 import json
+import requests
 import os
 
 
@@ -21,6 +22,8 @@ class MethodRewriteMiddleware(object):
 
 
 app = Flask(__name__)
+my_ip = requests.get('http://httpbin.org/ip').json()['origin']
+print('Running on %s' % my_ip)
 app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hasas-db.sqlite'
 app.config['SECRET_KEY'] = 'supersecret'
@@ -61,8 +64,8 @@ def register_unit():
     db.session.commit()
     return jsonify({
         'id': unit.id,
-        'checkin_url': 'http://78.91.3.162/checkin',
-        'certificate_url': 'http://78.91.3.162/certificates/%d.crt' % (unit.id)
+        'checkin_url': 'http://%s/checkin' % my_ip,
+        'certificate_url': 'http://%s/certificates/%d.crt' % (my_ip, unit.id)
     })
 
 
