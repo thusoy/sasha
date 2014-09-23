@@ -1,5 +1,7 @@
 #!/usr/bin/python
+
 import requests
+import os
 import sys
 import json
 import time
@@ -24,7 +26,7 @@ class Client(object):
         self.registry_url = None
 
         # Read config.ini
-        with open('config.json') as config_fh:
+        with open(os.path.join(os.path.dirname(__file__), 'config.json')) as config_fh:
             props = json.load( config_fh )
 
         self.unit_type = props['unit_type']
@@ -32,7 +34,7 @@ class Client(object):
 
 
     def setup(self):
-        with open('.ssh/id_rsa.csr') as csr_fh:
+        with open(os.path.expanduser(os.path.join('~', '.ssh', 'id_rsa.csr'))) as csr_fh:
             csr = csr_fh.read()
 
         payload = {
