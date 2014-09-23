@@ -105,7 +105,6 @@ class Client(object):
             'value': random.random()*100
         }]
 
-<<<<<<< HEAD
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='hasas_client')
@@ -115,8 +114,6 @@ def parse_args():
     return parser.parse_args()
 
 
-=======
->>>>>>> Add threads in client
 def main():
     args = parse_args()
     c = Client(args.master)
