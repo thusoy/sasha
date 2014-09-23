@@ -78,9 +78,11 @@ class Client(object):
                 'unit_id': self.id,
                 'readings': self.read()
             }
+            headers = {'Content-Type': 'application/json'}
+
             # Throws error on timeout, must have fallback!
             try:
-                requests.post(self.checkin_url, data=payload, timeout=5)
+                requests.post(self.checkin_url, data=json.dumps(payload), timeout=5, headers=headers)
                 print "%s sent to %s" % (payload, self.checkin_url)
                 backoff = 0
             except requests.exceptions.ConnectTimeout:
