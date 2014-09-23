@@ -1,6 +1,12 @@
 #!/usr/bin/python
-import requests, sys, json, time, random
+import requests
+import sys
+import json
+import time
+import random
+import threading
 import argparse
+import flask
 
 class Client(object):
 
@@ -15,6 +21,7 @@ class Client(object):
         # Replace with NFC discovery ??
         self.register_url = "http://%s/register-unit" % master
         self.checkin_url = None
+        self.registry_url = None
 
         # Read config.ini
         with open('config.json') as config_fh:
@@ -23,8 +30,8 @@ class Client(object):
         self.unit_type = props['unit_type']
         self.checkin_frequency = props['checkin_frequency']
 
-    def setup(self):
 
+    def setup(self):
         with open('.ssh/id_rsa.csr') as csr_fh:
             csr = csr_fh.read()
 
@@ -37,10 +44,10 @@ class Client(object):
 
         self.certificate_url = response['certificate_url']
         self.checkin_url = response['checkin_url']
+        self.registry_url = response['registry_url']
         self.id = response['id']
 
         self.collect_certificate()
-        self.schedule_checkin()
 
     def collect_certificate(self, backoff_interval=1):
         if backoff_interval > 9 or backoff_interval < 1:
@@ -58,7 +65,11 @@ class Client(object):
         if not self.certificate:
             self.collect_certificate(backoff_interval*2)
 
-    def schedule_checkin(self):
+    def find_devices(self):
+        requests.post(self.registry_url, timeout=5)
+
+
+    def do_checkins(self):
         backoff = 0
         while True:
             payload = {
@@ -77,12 +88,24 @@ class Client(object):
             sleeptime = min(self.checkin_frequency * pow(2, backoff), 60*15)
             time.sleep(sleeptime)
 
+    def do_listen(self):
+        app = flask.Flask(__name__)
+
+        @app.route('/')
+        def main():
+            return flask.jsonify({
+                'response': 'Got it'
+            })
+        app.run(host="0.0.0.0", port=80)
+
+
     def read(self):
         return [{
             'interface': 0,
             'value': random.random()*100
         }]
 
+<<<<<<< HEAD
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='hasas_client')
@@ -92,10 +115,14 @@ def parse_args():
     return parser.parse_args()
 
 
+=======
+>>>>>>> Add threads in client
 def main():
     args = parse_args()
     c = Client(args.master)
     c.setup()
+    threading.Thread(target=c.do_checkins)
+    threading.Thread(target=c.do_listen)
 
 if __name__ == '__main__':
     main()
