@@ -45,7 +45,7 @@ class Unit(db.Model):
     description = db.Column(db.Text())
     ip = db.Column(db.String(46))
     unit_type = db.Column(db.String(30))
-    pubkey = db.Column(db.Text())
+    pubkey = db.Column(db.Text(), unique=True)
 
 
 class SensorReading(db.Model):
@@ -61,9 +61,11 @@ def register_unit():
     unit_type = request.form.get('unit_type')
     if not (csr and unit_type):
         abort(400)
-    unit = Unit(unit_type=unit_type, pubkey=csr)
-    db.session.add(unit)
-    db.session.commit()
+    unit = Unit.query.filter_by(pubkey=csr).first()
+    if not unit:
+        unit = Unit(unit_type=unit_type, pubkey=csr)
+        db.session.add(unit)
+        db.session.commit()
     return jsonify({
         'id': unit.id,
         'checkin_url': url_for('unit_checkin', _external=True),
