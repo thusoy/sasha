@@ -112,12 +112,18 @@ def update_unit(unit_id):
 
 @app.route('/checkin', methods=['POST'])
 def unit_checkin():
-    data = request.json() or {}
+    unit_ip = request.access_route[0]
+    data = request.json or {}
     unit_id = data.get('unit_id')
     readings = data.get('readings')
-    if not unit_id and readings:
+    if not (unit_id and readings):
         abort(400)
     unit = Unit.query.get_or_404(unit_id)
+    unit.ip = unit_ip
+    db.session.commit()
+    return jsonify({
+        'status': 'OK!',
+    })
 
 
 
