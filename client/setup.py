@@ -1,9 +1,10 @@
 #!/usr/bin/python
 import requests, sys, json, time, random
+import argparse
 
 class Client(object):
 
-    def __init__(self):
+    def __init__(self, master):
         # Read from config.ini / pub- and priv-key files etc ??
         self.id = None
         self.unit_type = None
@@ -12,7 +13,7 @@ class Client(object):
         self.certificate = None
 
         # Replace with NFC discovery ??
-        self.register_url = "http://78.91.0.57/register-unit"
+        self.register_url = "http://%s/register-unit" % master
         self.checkin_url = None
 
         # Read config.ini
@@ -83,8 +84,17 @@ class Client(object):
         }]
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(prog='hasas_client')
+    parser.add_argument('master',
+        metavar='<master>',
+        default='hasas.zza.no')
+    return parser.parse_args()
+
+
 def main():
-    c = Client()
+    args = parse_args()
+    c = Client(args.master)
     c.setup()
 
 if __name__ == '__main__':
