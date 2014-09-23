@@ -118,8 +118,11 @@ def main():
     args = parse_args()
     c = Client(args.master)
     c.setup()
-    threading.Thread(target=c.do_checkins)
-    threading.Thread(target=c.do_listen)
+    checkin = threading.Thread(target=c.do_checkins)
+    callback = threading.Thread(target=c.do_listen)
+
+    checkin.start()
+    callback.start()
 
 if __name__ == '__main__':
     main()
