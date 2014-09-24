@@ -45,7 +45,16 @@ class Unit(db.Model):
     description = db.Column(db.Text())
     ip = db.Column(db.String(46))
     unit_type = db.Column(db.String(30))
-    pubkey = db.Column(db.Text(), unique=True)
+    state = db.Column(db.String(20), default='not-approved')
+    certificate = db.Column(db.Text(), unique=True)
+
+    def to_json(self):
+        return {
+            'ip': self.ip,
+            'id': self.id,
+            'unit_type': self.unit_type,
+            'certificate': self.certificate,
+        }
 
 
 class SensorReading(db.Model):
@@ -61,9 +70,9 @@ def register_unit():
     unit_type = request.form.get('unit_type')
     if not (csr and unit_type):
         abort(400)
-    unit = Unit.query.filter_by(pubkey=csr).first()
+    unit = Unit.query.filter_by(certificate=csr).first()
     if not unit:
-        unit = Unit(unit_type=unit_type, pubkey=csr)
+        unit = Unit(unit_type=unit_type, certificate=csr)
         db.session.add(unit)
         db.session.commit()
     return jsonify({
@@ -84,11 +93,7 @@ def main():
 def registry():
     units = Unit.query.all()
     return jsonify({
-        'units': [{
-            'ip': unit.ip,
-            'id': unit.id,
-            'unit_type': unit.unit_type,
-        } for unit in units],
+        'units': [unit.to_json() for unit in units],
     })
 
 
@@ -121,9 +126,26 @@ def unit_checkin():
     unit = Unit.query.get_or_404(unit_id)
     unit.ip = unit_ip
     db.session.commit()
+    notify_units_of_registry_update()
     return jsonify({
         'status': 'OK!',
     })
+
+
+def notify_units_of_registry_update():
+    units = Unit.query.all()
+    headers = {'content-type': 'application/json'}
+    for unit in units:
+        try:
+            target = 'http://%s/registry-updated' % unit.ip
+            print('Notifying %s notified of registry update' % target)
+            requests.post(target, data=json.dumps({
+                'units': [u.to_json() for u in units],
+            }), timeout=4)
+        except:
+            import traceback
+            traceback.print_exc()
+            print('Unit %s does not respond to registry update, skipping...' % unit.id)
 
 
 
