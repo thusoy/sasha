@@ -25,6 +25,8 @@ class Client(object):
         self.checkin_url = None
         self.registry_url = None
 
+        self.registry = []
+
         # Read config.ini
         with open(os.path.join(os.path.dirname(__file__), 'config.json')) as config_fh:
             props = json.load( config_fh )
@@ -50,6 +52,7 @@ class Client(object):
         self.id = response['id']
 
         self.collect_certificate()
+        self.populate_registry()
 
     def collect_certificate(self, backoff_interval=1):
         if backoff_interval > 9 or backoff_interval < 1:
@@ -67,8 +70,16 @@ class Client(object):
         if not self.certificate:
             self.collect_certificate(backoff_interval*2)
 
-    def find_devices(self):
-        requests.post(self.registry_url, timeout=5)
+    def populate_registry(self):
+        r = requests.get(self.registry_url, timeout=5)
+        if r.status_code == requests.codes.ok:
+            response = r.json()
+            self.registry = response['units'];
+        print "Found %d other devices" % len(self.registry)
+
+
+    def add_to_registry(self, unit):
+        pass
 
 
     def do_checkins(self):
@@ -100,6 +111,13 @@ class Client(object):
             return flask.jsonify({
                 'response': 'Got it'
             })
+
+        @app.route('/registry-updated', methods=["POST"])
+        def registry_update():
+            return flask.jsonify({
+                'status': 'OK',
+            })
+
         app.run(host="0.0.0.0", port=80)
 
 
