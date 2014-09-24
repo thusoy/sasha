@@ -1,5 +1,6 @@
 <!doctype html>
 <title>Hasas</title>
+<meta http-equiv="refresh" content="3">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 <body class="container">
@@ -19,7 +20,7 @@
 {% endwith %}
 
 <table class="table">
-    <tr><th>ID</th><th>Alias</th><th>Description</th><th>IP</th><th>Public key</th><th>Unit type</th><th>Actions</th><th>Slett</th></tr>
+    <tr><th>ID</th><th>Alias</th><th>Description</th><th>IP</th><th>Public key</th><th>Unit type</th><th>Last checkin</th><th>Actions</th><th>Slett</th></tr>
     {% for unit in units %}
         <tr>
             <td>{{ unit.id }}</td>
@@ -30,8 +31,9 @@
                 <input type="text" name="description" value="{{ unit.description }}" form="update-unit-form-{{ loop.index }}">
             </td>
             <td>{{ unit.ip }}</td>
-            <td>{{ unit.pubkey }}</td>
+            <td>{{ unit.certificate }}</td>
             <td>{{ unit.unit_type }}</td>
+            <td>{{ unit.last_checkin }}</td>
             <td>
                 <form method="post" action="{{ url_for('update_unit', unit_id=unit.id) }}" class="form-inline" id="update-unit-form-{{ loop.index }}">
                     <input type="submit" value="Oppdater" class="btn btn-primary">
