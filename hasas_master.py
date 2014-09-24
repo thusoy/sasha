@@ -4,6 +4,7 @@ from werkzeug import url_decode
 import json
 import requests
 import os
+from datetime import datetime
 
 
 class MethodRewriteMiddleware(object):
@@ -46,6 +47,7 @@ class Unit(db.Model):
     ip = db.Column(db.String(46))
     unit_type = db.Column(db.String(30))
     state = db.Column(db.String(20), default='not-approved')
+    last_checkin = db.Column(db.DateTime())
     certificate = db.Column(db.Text(), unique=True)
 
     def to_json(self):
@@ -125,6 +127,7 @@ def unit_checkin():
         abort(400)
     unit = Unit.query.get_or_404(unit_id)
     unit.ip = unit_ip
+    unit.last_checkin = datetime.utcnow()
     db.session.commit()
     notify_units_of_registry_update()
     return jsonify({
