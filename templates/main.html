@@ -33,7 +33,7 @@
             <td>{{ unit.ip }}</td>
             <td>{{ unit.certificate }}</td>
             <td>{{ unit.unit_type }}</td>
-            <td>{{ unit.last_checkin }}</td>
+            <td>{{ unit.last_checkin.strftime('%H:%M:%S') }}</td>
             <td>
                 <form method="post" action="{{ url_for('update_unit', unit_id=unit.id) }}" class="form-inline" id="update-unit-form-{{ loop.index }}">
                     <input type="submit" value="Oppdater" class="btn btn-primary">
