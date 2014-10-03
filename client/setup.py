@@ -24,8 +24,10 @@ class Client(object):
         self.register_url = "http://%s/register-unit" % master
         self.checkin_url = None
         self.registry_url = None
-
         self.registry = []
+
+        # must import file / package / something
+        self.interfaces = InterfaceList()
 
         # Read config.ini
         with open(os.path.join(os.path.dirname(__file__), 'config.json')) as config_fh:
@@ -33,6 +35,8 @@ class Client(object):
 
         self.unit_type = props['unit_type']
         self.checkin_frequency = props['checkin_frequency']
+        #self.interfaces = propes['interfaces']
+
 
 
     def setup(self):
@@ -139,6 +143,8 @@ def parse_args():
 def main():
     args = parse_args()
     c = Client(args.master)
+    print c.interfaces();
+    return
     c.setup()
     checkin = threading.Thread(target=c.do_checkins)
     callback = threading.Thread(target=c.do_listen)

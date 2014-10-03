@@ -17,6 +17,12 @@ sudo ./client/genkeys.sh
 
 # Install PiFace
 sudo apt-get install python-pifaced
+
+sudo apt-get install pifacecommon
+
+# Enable SPI module
+sudo modprobe spi-bmc2708
+
 # Start the sysinfo service
 sudo service pifacecafsysinfo start
 # Enable service to run at boot
