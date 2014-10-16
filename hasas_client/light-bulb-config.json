@@ -4,10 +4,4 @@
     "actuators": {
         "ac0": "hasas_client.interfaces.LightBulbActuator"
     },
-    "sensors": {
-        "if0": "hasas_client.interfaces.TemperatureSensor"
-    },
-    "subscribe": [
-        "LIGHT_BULB"
-    ]
 }
