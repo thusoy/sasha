@@ -159,7 +159,7 @@ def unit_checkin():
 
 
 def notify_units_of_registry_update():
-    units = Unit.query.all()
+    units = Unit.query.filter(Unit.state=='approved').all()
     headers = {'content-type': 'application/json'}
     for unit in units:
         try:
