@@ -2,9 +2,14 @@ import random
 import time
 import json
 
+
 class Actuator(object):
 
     do = {}
+
+    def __init__(self, itnerface_id):
+        self.itnerface_id = interface_id
+
 
     def describe(self):
         return {
@@ -24,7 +29,9 @@ class Actuator(object):
         except KeyError:
             print "unknown action"
 
+
 class Sensor(object):
+
     def describe(self):
         return {
             "id": self.id,
@@ -33,45 +40,19 @@ class Sensor(object):
         }
         print self.__doc__
 
-class TemperatureSensor(Sensor):
-    """Track current temperature in Celcius"""
-    def __init__(self, interface_id):
-        self.type = "TEMPERATURE"
-        self.id = interface_id
-
-    def read(self):
-        """Report the current temperature in Celcius"""
-        return random.random()*60 - 20 # report temperatures in range -20, 40
-
-class TermostatActuator(Actuator):
-    """Set target temperature on heating device"""
-
-    def __init__(self, interface_id):
-        self.type = "TERMOSTAT"
-        self.id = interface_id
-        self.value = 20
-        self.do = {
-            "SET_TEMPERATURE": self.set_temp
-        }
-
-    def set_temp(self, temp=0):
-        """Set termostat value to given parameter 'temp', where 'temp' is in range(14, 24)"""
-
-        if temp and (14 <= temp <= 24):
-            print "temperature set to %d" % x
-        else:
-            raise ArgumentError("Invalid temperature")
 
 class LightBulbActuator(Actuator):
     """Set the status of a light bulb"""
 
+    type = "LIGHT_BULB"
+
     def __init__(self, interface_id):
-        self.type = "LIGHT_BULB"
-        self.id = interface_id
+        super(LightBulbActuator, self).__init__()
         self.light_on = False
-        self.do = {
+        do = {
             "SET_LIGHT": self.set_light
         }
+
 
     def set_light(self, light_on=False):
         """Turn on the light bulb if the parameter light_on is True, otherwise turn light off"""
