@@ -1,10 +1,12 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import requests
 import os
 import sys
 import json
 import time
+import importlib
 import random
 import threading
 import argparse
@@ -26,17 +28,29 @@ class Client(object):
         self.registry_url = None
         self.registry = []
 
-        # must import file / package / something
-        self.interfaces = InterfaceList()
-
         # Read config.ini
         with open(os.path.join(os.path.dirname(__file__), 'config.json')) as config_fh:
             props = json.load( config_fh )
 
         self.unit_type = props['unit_type']
         self.checkin_frequency = props['checkin_frequency']
-        #self.interfaces = propes['interfaces']
 
+        self.actuators = {}
+        for interface, actuator_class in props.get("actuators", {}).items():
+            klass = self.load_class_from_module(actuator_class)
+            self.actuators[interface] = klass(interface)
+
+        self.sensors = {}
+        for interface, sensor_class in props.get("sensors", {}).items():
+            klass = self.load_class_from_module(sensor_class)
+            self.sensors[interface] = klass(interface)
+
+
+    def load_class_from_module(self, importstring):
+        module_name, class_name = importstring.rsplit('.', 1)
+        module = importlib.import_module(module_name)
+        klass = getattr(module, class_name)
+        return klass
 
 
     def setup(self):
@@ -45,9 +59,22 @@ class Client(object):
 
         payload = {
             'unit_type': self.unit_type,
-            'csr': csr
+            'csr': csr,
+            'sensors': [{
+                'id': interface,
+                'description': value.describe()
+                } for interface, value in self.sensors.items()],
+            'actuators': [{
+                'id': interface,
+                'description': value.describe()
+                } for interface, value in self.actuators.items()]
         }
-        r = requests.post(self.register_url, data=payload)
+
+        headers = {'Content-Type': 'application/json'}
+        r = requests.post(self.register_url, data=json.dumps(payload), headers=headers)
+        if not r.ok:
+            print 'Handshake with master failed, terminating...'
+            sys.exit(1)
         response = r.json()
 
         self.certificate_url = response['certificate_url']
@@ -91,7 +118,9 @@ class Client(object):
         while True:
             payload = {
                 'unit_id': self.id,
-                'readings': self.read()
+                'readings': {
+                    interface: sensor.read()
+                for interface, sensor in self.sensors.items()}
             }
             headers = {'Content-Type': 'application/json'}
 
@@ -100,15 +129,32 @@ class Client(object):
                 requests.post(self.checkin_url, data=json.dumps(payload), timeout=5, headers=headers)
                 print "%s sent to %s" % (payload, self.checkin_url)
                 backoff = 0
-            except requests.exceptions.ConnectTimeout:
+            except requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout:
                 print "request timed out"
                 backoff += 1
 
-            sleeptime = min(self.checkin_frequency * pow(2, backoff), 60*15)
+
+
+            sleeptime = min(self.checkin_frequency * 2**backoff, 60*15)
             time.sleep(sleeptime)
 
     def do_listen(self):
         app = flask.Flask(__name__)
+
+        #post: /if0 {SET_TEMPERATURE, {'temperature'=13}}
+
+        @app.route('/actuator/<actuator_id>', methods=['POST'])
+        def run_actuator(actuator_id):
+            actuator = self.actuators.get(actuator_id)
+            if not actuator:
+                abort(400)
+            payload = request.json or {}
+            action = payload.get('action')
+            args = payload.get('args', [])
+            kwargs = payload.get('kwargs', {})
+            if not action and (args or kwargs):
+                abort(400)
+            actuator.actuate(action, *args, **kwargs)
 
         @app.route('/')
         def main():
@@ -143,14 +189,9 @@ def parse_args():
 def main():
     args = parse_args()
     c = Client(args.master)
-    print c.interfaces();
-    return
     c.setup()
     checkin = threading.Thread(target=c.do_checkins)
     callback = threading.Thread(target=c.do_listen)
 
     checkin.start()
     callback.start()
-
-if __name__ == '__main__':
-    main()
