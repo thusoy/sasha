@@ -1,7 +1,6 @@
 {
     "unit_type": "LIGHT_BULB",
     "checkin_frequency": 10,
-    "client_class": "hasas_client.LightBulbClient",
     "actuators": {
         "ac0": "hasas_client.interfaces.LightBulbActuator"
     }
