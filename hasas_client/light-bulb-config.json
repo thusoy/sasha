@@ -4,5 +4,5 @@
     "client_class": "hasas_client.LightBulbClient",
     "actuators": {
         "ac0": "hasas_client.interfaces.LightBulbActuator"
-    },
+    }
 }
