@@ -46,8 +46,8 @@ class LightBulbActuator(Actuator):
 
     type = "LIGHT_BULB"
 
-    def __init__(self, interface_id):
-        super(LightBulbActuator, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(LightBulbActuator, self).__init__(*args, **kwargs)
         self.light_on = False
         do = {
             "SET_LIGHT": self.set_light
