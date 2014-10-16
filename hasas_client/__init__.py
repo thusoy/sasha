@@ -154,7 +154,7 @@ class Client(object):
             actuator = self.actuators.get(actuator_id)
             if not actuator:
                 abort(400)
-            payload = request.json or {}
+            payload = flask.request.json or {}
             action = payload.get('action')
             args = payload.get('args', [])
             kwargs = payload.get('kwargs', {})
@@ -201,20 +201,21 @@ class LightBulbClient(Client):
         headers = {'Content-Type': 'application/json'}
 
         for light_bulb in self.light_bulbs:
-            request.post(light_bulb, data=json.dumps(payoad), headers=headers)
+            requests.post(light_bulb, data=json.dumps(payoad), headers=headers)
             light_bulb.do("SET_LIGHT", light_on);
 
         print "Turned %s the associated light bulbs." % ("on" if self.light_on else "off")
 
 
     def registry_update(self):
+
         light_bulbs = []
-        payload = request.json or {}
+        payload = flask.request.json or {}
         for unit in payload.get('units', []):
             if unit.get('unit_type') == "LIGHT_BULB":
-                for interface, data in unit.get('actuators').items():
-                    if data.get('type') == "LIGHT_BULB":
-                        light_bulbs.append('http://%s/actuator/%s' % (unit['ip'], interface))
+                for actuator in unit.get('actuators', []):
+                    if actuator["data"].get('type') == "LIGHT_BULB":
+                        light_bulbs.append('http://%s/actuator/%s' % (unit['ip'], actuator['id']))
 
         self.light_bulbs = light_bulbs
 
