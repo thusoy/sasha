@@ -168,8 +168,7 @@ class Client(object):
                 'response': 'Got it'
             })
 
-        @app.route('/registry-updated', methods=["POST"])
-        self.registry_update
+        app.add_url_rule('/registry-updated', 'registry_update', self.registry_update, methods=["POST"])
 
         app.run(host="0.0.0.0", port=80)
 
@@ -207,6 +206,7 @@ class LightBulbClient(Client):
 
         print "Turned %s the associated light bulbs." % ("on" if self.light_on else "off")
 
+
     def registry_update(self):
         light_bulbs = []
         payload = request.json or {}
@@ -214,9 +214,12 @@ class LightBulbClient(Client):
             if unit.get('unit_type') == "LIGHT_BULB":
                 for interface, data in unit.get('actuators').items():
                     if data.get('type') == "LIGHT_BULB":
-                        light_bulbs.append('http://%s/actuator/%s' % (unit['ip'], interface)
+                        light_bulbs.append('http://%s/actuator/%s' % (unit['ip'], interface))
+
+        self.light_bulbs = light_bulbs
 
         return super(LightBulbClient, self).registry_update()
+
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='hasas_client')
