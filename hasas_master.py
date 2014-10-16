@@ -33,6 +33,7 @@ app.config['PREFERRED_URL_SCHEME'] = 'https'
 db = SQLAlchemy(app)
 
 
+
 def wants_json():
     best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
     return best == 'application/json' and \
@@ -49,6 +50,7 @@ class Unit(db.Model):
     state = db.Column(db.String(20), default='not-approved')
     last_checkin = db.Column(db.DateTime())
     certificate = db.Column(db.Text(), unique=True)
+    interfaces = db.Column(db.Text())
 
     def to_json(self):
         return {
@@ -68,13 +70,33 @@ class SensorReading(db.Model):
 
 @app.route('/register-unit', methods=['POST'])
 def register_unit():
-    csr = request.form.get('csr')
-    unit_type = request.form.get('unit_type')
-    if not (csr and unit_type):
+    posted_data = request.json or {}
+    csr = posted_data.get('csr')
+    unit_type = posted_data.get('unit_type')
+    sensors = posted_data.get('sensors')
+    actuators = posted_data.get('actuators')
+    print json.dumps(posted_data, indent=2)
+    if not (csr and unit_type and sensors and actuators):
         abort(400)
     unit = Unit.query.filter_by(certificate=csr).first()
-    if not unit:
-        unit = Unit(unit_type=unit_type, certificate=csr)
+    if unit:
+        if unit.state == 'rejected':
+            return jsonify({
+                'status': 403,
+                'message': 'You have been rejected.'
+                }), 403
+    else:
+        interfaces = {}
+        for sensor in sensors:
+            interfaces[sensor['id']] = sensor['description']
+        for actuator in actuators:
+            interfaces[actuator['id']] = actuator['description']
+        print interfaces
+        unit = Unit(
+            unit_type=unit_type,
+            certificate=csr,
+            interfaces=json.dumps(interfaces),
+        )
         db.session.add(unit)
         db.session.commit()
     return jsonify({
@@ -87,8 +109,9 @@ def register_unit():
 
 @app.route('/')
 def main():
-    units = Unit.query.all()
-    return render_template('main.html', units=units)
+    approved_units = Unit.query.filter(Unit.state=='approved').all()
+    unapproved_units = Unit.query.filter(Unit.state=='not-approved').all()
+    return render_template('main.html', approved_units=approved_units, unapproved_units=unapproved_units)
 
 
 @app.route('/registry')
@@ -126,6 +149,8 @@ def unit_checkin():
     if not (unit_id and readings):
         abort(400)
     unit = Unit.query.get_or_404(unit_id)
+    if not unit.state == 'approved':
+        abort(400)
     unit.ip = unit_ip
     unit.last_checkin = datetime.utcnow()
     db.session.commit()
@@ -167,6 +192,24 @@ def delete_unit(unit_id):
         })
     else:
         return redirect(url_for('main'))
+
+
+@app.route('/approve-unit/<int:unit_id>', methods=['POST'])
+def approve_unit(unit_id):
+    unit = Unit.query.get_or_404(unit_id)
+    unit.state = 'approved'
+    db.session.commit()
+    flash('Accepted unit %s' % unit.id, 'info')
+    return redirect(url_for('main'))
+
+
+@app.route('/reject-unit/<int:unit_id>', methods=['POST'])
+def reject_unit(unit_id):
+    unit = Unit.query.get_or_404(unit_id)
+    unit.state = 'rejected'
+    db.session.commit()
+    flash('Unit %s rejected' % unit.id, 'info')
+    return redirect(url_for('main'))
 
 
 @app.route('/certificates/<int:unit_id>.crt')

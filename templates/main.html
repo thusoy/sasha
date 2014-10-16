@@ -19,9 +19,11 @@
   {% endif %}
 {% endwith %}
 
+{% if unapproved_units %}
+<h2>New unapproved units</h2>
 <table class="table">
-    <tr><th>ID</th><th>Alias</th><th>Description</th><th>IP</th><th>Public key</th><th>Unit type</th><th>Last checkin</th><th>Actions</th><th>Slett</th></tr>
-    {% for unit in units %}
+    <tr><th>ID</th><th>Alias</th><th>Description</th><th>IP</th><th>Public key</th><th>Unit type</th><th>Actions</th></tr>
+    {% for unit in unapproved_units %}
         <tr>
             <td>{{ unit.id }}</td>
             <td>
@@ -33,15 +35,43 @@
             <td>{{ unit.ip }}</td>
             <td>{{ unit.certificate }}</td>
             <td>{{ unit.unit_type }}</td>
-            <td>{{ unit.last_checkin.strftime('%H:%M:%S') }}</td>
+            <td>
+                <form method="post" action="{{ url_for('approve_unit', unit_id=unit.id) }}" class="form-inline" id="update-unit-form-{{ loop.index }}">
+                    <input type="submit" value="Accept" class="btn btn-primary">
+                </form>
+                <form method="post" action="{{ url_for('reject_unit', unit_id=unit.id) }}" class="form-inline">
+                    <input type="submit" value="Reject" class="btn btn-danger">
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+<h2>My units</h2>
+<table class="table">
+    <tr><th>ID</th><th>Alias</th><th>Description</th><th>IP</th><th>Public key</th><th>Unit type</th><th>Last checkin</th><th>Actions</th><th>Slett</th></tr>
+    {% for unit in approved_units %}
+        <tr>
+            <td>{{ unit.id }}</td>
+            <td>
+                <input type="text" name="alias" value="{{ unit.alias }}" form="update-unit-form-{{ loop.index }}">
+            </td>
+            <td>
+                <input type="text" name="description" value="{{ unit.description }}" form="update-unit-form-{{ loop.index }}">
+            </td>
+            <td>{{ unit.ip }}</td>
+            <td>{{ unit.certificate }}</td>
+            <td>{{ unit.unit_type }}</td>
+            <td>{{ unit.last_checkin.strftime('%H:%M:%S') if unit.last_checkin else 'Not heard from yet'}}</td>
             <td>
                 <form method="post" action="{{ url_for('update_unit', unit_id=unit.id) }}" class="form-inline" id="update-unit-form-{{ loop.index }}">
-                    <input type="submit" value="Oppdater" class="btn btn-primary">
+                    <input type="submit" value="Update" class="btn btn-primary">
                 </form>
             </td>
             <td>
                 <form method="post" action="{{ url_for('delete_unit', unit_id=unit.id) }}?_method=DELETE" class="form-inline">
-                    <input type="submit" value="Slett" class="btn btn-danger">
+                    <input type="submit" value="Delete" class="btn btn-danger">
                 </form>
             </td>
         </tr>
