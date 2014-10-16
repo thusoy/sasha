@@ -50,7 +50,8 @@ class Unit(db.Model):
     state = db.Column(db.String(20), default='not-approved')
     last_checkin = db.Column(db.DateTime())
     certificate = db.Column(db.Text(), unique=True)
-    interfaces = db.Column(db.Text())
+    actuators = db.Column(db.Text())
+    sensors = db.Column(db.Text())
 
     def to_json(self):
         return {
@@ -58,6 +59,8 @@ class Unit(db.Model):
             'id': self.id,
             'unit_type': self.unit_type,
             'certificate': self.certificate,
+            'sensors': json.loads(self.sensors),
+            'actuators': json.loads(self.actuators),
         }
 
 
@@ -86,16 +89,11 @@ def register_unit():
                 'message': 'You have been rejected.'
                 }), 403
     else:
-        interfaces = {}
-        for sensor in sensors:
-            interfaces[sensor['id']] = sensor['description']
-        for actuator in actuators:
-            interfaces[actuator['id']] = actuator['description']
-        print interfaces
         unit = Unit(
             unit_type=unit_type,
             certificate=csr,
-            interfaces=json.dumps(interfaces),
+            sensors=json.dumps(sensors),
+            actuators=json.dumps(actuators),
         )
         db.session.add(unit)
         db.session.commit()
