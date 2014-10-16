@@ -7,8 +7,8 @@ class Actuator(object):
 
     do = {}
 
-    def __init__(self, itnerface_id):
-        self.itnerface_id = interface_id
+    def __init__(self, interface_id):
+        self.interface_id = interface_id
 
 
     def describe(self):
