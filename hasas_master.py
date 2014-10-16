@@ -76,10 +76,10 @@ def register_unit():
     posted_data = request.json or {}
     csr = posted_data.get('csr')
     unit_type = posted_data.get('unit_type')
-    sensors = posted_data.get('sensors')
-    actuators = posted_data.get('actuators')
+    sensors = posted_data.get('sensors', [])
+    actuators = posted_data.get('actuators', [])
     print json.dumps(posted_data, indent=2)
-    if not (csr and unit_type and sensors and actuators):
+    if not (csr and unit_type):
         abort(400)
     unit = Unit.query.filter_by(certificate=csr).first()
     if unit:
