@@ -167,7 +167,7 @@ def notify_units_of_registry_update():
             print('Notifying %s notified of registry update' % target)
             requests.post(target, data=json.dumps({
                 'units': [u.to_json() for u in units],
-            }), timeout=4)
+            }), timeout=4, headers={'content-type': 'application/json'})
         except:
             import traceback
             traceback.print_exc()
