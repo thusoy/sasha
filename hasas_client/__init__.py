@@ -12,6 +12,13 @@ import threading
 import argparse
 import flask
 
+def load_class_from_module(importstring):
+    module_name, class_name = importstring.rsplit('.', 1)
+    module = importlib.import_module(module_name)
+    klass = getattr(module, class_name)
+    return klass
+
+
 class Client(object):
 
     def __init__(self, master, config_file):
@@ -37,20 +44,14 @@ class Client(object):
 
         self.actuators = {}
         for interface, actuator_class in props.get("actuators", {}).items():
-            klass = self.load_class_from_module(actuator_class)
+            klass = load_class_from_module(actuator_class)
             self.actuators[interface] = klass(interface)
 
         self.sensors = {}
         for interface, sensor_class in props.get("sensors", {}).items():
-            klass = self.load_class_from_module(sensor_class)
+            klass = load_class_from_module(sensor_class)
             self.sensors[interface] = klass(interface)
 
-
-    def load_class_from_module(self, importstring):
-        module_name, class_name = importstring.rsplit('.', 1)
-        module = importlib.import_module(module_name)
-        klass = getattr(module, class_name)
-        return klass
 
 
     def setup(self):
@@ -191,10 +192,14 @@ def parse_args():
 
 def main():
     args = parse_args()
-    c = Client(args.master, args.config)
-    c.setup()
-    checkin = threading.Thread(target=c.do_checkins)
-    callback = threading.Thread(target=c.do_listen)
+    with open(args.config) as config_fh:
+        config = json.load(config_fh)
+        client_class_name = config.get('client_class', 'hasas_client.Client')
+        client_class = load_class_from_module(client_class_name)
+    client = client_class(args.master, args.config)
+    client.setup()
+    checkin = threading.Thread(target=client.do_checkins)
+    callback = threading.Thread(target=client.do_listen)
 
     checkin.start()
     callback.start()
