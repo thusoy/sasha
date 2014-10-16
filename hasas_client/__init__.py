@@ -14,7 +14,7 @@ import flask
 
 class Client(object):
 
-    def __init__(self, master):
+    def __init__(self, master, config_file):
         # Read from config.ini / pub- and priv-key files etc ??
         self.id = None
         self.unit_type = None
@@ -29,8 +29,8 @@ class Client(object):
         self.registry = []
 
         # Read config.ini
-        with open(os.path.join(os.path.dirname(__file__), 'config.json')) as config_fh:
-            props = json.load( config_fh )
+        with open(config_file) as config_fh:
+            props = json.load(config_fh)
 
         self.unit_type = props['unit_type']
         self.checkin_frequency = props['checkin_frequency']
@@ -183,12 +183,15 @@ def parse_args():
     parser.add_argument('master',
         metavar='<master>',
         default='hasas.zza.no')
+    parser.add_argument('-c', '--config',
+        metavar='<config-file>',
+        default='config.json')
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    c = Client(args.master)
+    c = Client(args.master, args.config)
     c.setup()
     checkin = threading.Thread(target=c.do_checkins)
     callback = threading.Thread(target=c.do_listen)
