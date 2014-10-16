@@ -43,12 +43,11 @@ class TemperatureSensor(Sensor):
         """Report the current temperature in Celcius"""
         return random.random()*60 - 20 # report temperatures in range -20, 40
 
-
 class TermostatActuator(Actuator):
     """Set target temperature on heating device"""
 
     def __init__(self, interface_id):
-        self.type = "ACTUATOR"
+        self.type = "TERMOSTAT"
         self.id = interface_id
         self.value = 20
         self.do = {
@@ -63,12 +62,18 @@ class TermostatActuator(Actuator):
         else:
             raise ArgumentError("Invalid temperature")
 
+class LightBulbActuator(Actuator):
+    """Set the status of a light bulb"""
 
+    def __init__(self, interface_id):
+        self.type = "LIGHT_BULB"
+        self.id = interface_id
+        self.light_on = False
+        self.do = {
+            "SET_LIGHT": self.set_light
+        }
 
-
-def test_interfaces():
-    iflist = InterfaceList()
-    print json.dumps(iflist.describe(), indent=2);
-
-if __name__ == '__main__':
-    test_interfaces()
+    def set_light(self, light_on=False):
+        """Turn on the light bulb if the parameter light_on is True, otherwise turn light off"""
+        self.light_on = bool(light_on)
+        print "Turned %s the light." % ("on" if self.light_on else "off")

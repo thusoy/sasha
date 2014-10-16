@@ -63,11 +63,11 @@ class Client(object):
             'csr': csr,
             'sensors': [{
                 'id': interface,
-                'description': value.describe()
+                'data': value.describe()
                 } for interface, value in self.sensors.items()],
             'actuators': [{
                 'id': interface,
-                'description': value.describe()
+                'data': value.describe()
                 } for interface, value in self.actuators.items()]
         }
 
@@ -139,6 +139,11 @@ class Client(object):
             sleeptime = min(self.checkin_frequency * 2**backoff, 60*15)
             time.sleep(sleeptime)
 
+    def registry_update(self):
+        return flask.jsonify({
+            'status': 'OK',
+        })
+
     def do_listen(self):
         app = flask.Flask(__name__)
 
@@ -164,10 +169,7 @@ class Client(object):
             })
 
         @app.route('/registry-updated', methods=["POST"])
-        def registry_update():
-            return flask.jsonify({
-                'status': 'OK',
-            })
+        self.registry_update
 
         app.run(host="0.0.0.0", port=80)
 
@@ -178,6 +180,43 @@ class Client(object):
             'value': random.random()*100
         }]
 
+
+class LightBulbClient(Client):
+    """Controll associated light bulbs"""
+
+    def __init__(self):
+        super(LightBulbController, self).__init__()
+        self.light_bulbs = []
+
+
+    def set_light(self, light_on=False):
+        """Message all associated light bulbs to turn on / off based on parameter light_on"""
+        self.light_on = bool(light_on)
+
+        payoad = {
+            "action": "SET_LIGHT",
+            "kwargs": {
+                "light_on": light_on
+            }
+        }
+        headers = {'Content-Type': 'application/json'}
+
+        for light_bulb in self.light_bulbs:
+            request.post(light_bulb, data=json.dumps(payoad), headers=headers)
+            light_bulb.do("SET_LIGHT", light_on);
+
+        print "Turned %s the associated light bulbs." % ("on" if self.light_on else "off")
+
+    def registry_update(self):
+        light_bulbs = []
+        payload = request.json or {}
+        for unit in payload.get('units', []):
+            if unit.get('unit_type') == "LIGHT_BULB":
+                for interface, data in unit.get('actuators').items():
+                    if data.get('type') == "LIGHT_BULB":
+                        light_bulbs.append('http://%s/actuator/%s' % (unit['ip'], interface)
+
+        return super(LightBulbClient, self).registry_update()
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='hasas_client')
