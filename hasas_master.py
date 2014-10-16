@@ -143,8 +143,8 @@ def unit_checkin():
     unit_ip = request.access_route[0]
     data = request.json or {}
     unit_id = data.get('unit_id')
-    readings = data.get('readings')
-    if not (unit_id and readings):
+    readings = data.get('readings', {})
+    if not unit_id:
         abort(400)
     unit = Unit.query.get_or_404(unit_id)
     if not unit.state == 'approved':
