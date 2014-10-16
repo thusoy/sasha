@@ -184,7 +184,7 @@ class LightBulbClient(Client):
     """Controll associated light bulbs"""
 
     def __init__(self, *args, **kwargs):
-        super(LightBulbController, self).__init__(*args, **kwargs)
+        super(LightBulbClient, self).__init__(*args, **kwargs)
         self.light_bulbs = []
 
 
