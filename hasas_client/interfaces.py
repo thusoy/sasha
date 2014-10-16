@@ -13,7 +13,7 @@ class Actuator(object):
 
     def describe(self):
         return {
-            "id": self.id,
+            "id": self.interface_id,
             "type": self.type,
             "description": self.__doc__,
             "actions": [{
