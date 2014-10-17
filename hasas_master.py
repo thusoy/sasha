@@ -52,6 +52,8 @@ class Unit(db.Model):
     certificate = db.Column(db.Text(), unique=True)
     actuators = db.Column(db.Text())
     sensors = db.Column(db.Text())
+    associated_to_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
+    associated_to = db.relationship('Unit', remote_side=id, backref='associates')
 
     def to_json(self):
         return {
@@ -166,7 +168,7 @@ def notify_units_of_registry_update():
             target = 'http://%s/registry-updated' % unit.ip
             print('Notifying %s notified of registry update' % target)
             requests.post(target, data=json.dumps({
-                'units': [u.to_json() for u in units],
+                'units': [u.to_json() for u in unit.associates],
             }), timeout=4, headers={'content-type': 'application/json'})
         except:
             import traceback
@@ -198,6 +200,24 @@ def approve_unit(unit_id):
     unit.state = 'approved'
     db.session.commit()
     flash('Accepted unit %s' % unit.id, 'info')
+    return redirect(url_for('main'))
+
+
+@app.route('/connect-units', methods=['POST'])
+def connect_units():
+    unit_id = request.form.get('unit_id')
+    if not unit_id:
+        abort(400)
+    unit = Unit.query.get_or_404(unit_id)
+    other_unit_id = request.form.get('other_unit', '')
+    if other_unit_id:
+        other_unit = Unit.query.get_or_404(other_unit_id)
+        unit.associated_to = other_unit
+        flash('%s succcessfully associated to %s' % (unit.alias, other_unit.alias), 'info')
+    else:
+        unit.associated_to = None
+        flash('Removed associatation from %s' % unit.alias, 'info')
+    db.session.commit()
     return redirect(url_for('main'))
 
 
