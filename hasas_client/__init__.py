@@ -81,7 +81,7 @@ class Client(object):
         headers = {'Content-Type': 'application/json'}
         try:
             r = requests.post(self.register_url, data=json.dumps(payload), headers=headers, timeout=1)
-        except requests.exeptions.RequestException:
+        except requests.exceptions.RequestException:
             print "[error]\tsomething went wrong while connecting to master"
             sys.exit(1)
         if not r.ok:
@@ -106,7 +106,7 @@ class Client(object):
             print "[info]\trequesting certificate from %s (master)" % (self.certificate_url)
             try:
                 r = requests.get(self.certificate_url)
-            except requests.exeptions.RequestException:
+            except requests.exceptions.RequestException:
                 print "[warning]\tcould not collect certificate from master"
             else:
                 if r.ok:
@@ -138,7 +138,7 @@ class Client(object):
             except requests.exceptions.Timeout:
                 print "[error]\ttimeout occured in do_checkins"
                 backoff += 1
-            except requests.exeptions.RequestException:
+            except requests.exceptions.RequestException:
                 print "[error]\tsomething went wrong in do_checkins"
                 backoff += 1
 
@@ -217,7 +217,7 @@ class LightBulbClient(Client):
                 print "[info]\tSET_LIGHT success for %s" % light_bulb
             except requests.exceptions.Timeout:
                 print "[error]\tSET_LIGHT timeout for %s" % light_bulb
-            except requests.exeptions.RequestException:
+            except requests.exceptions.RequestException:
                 print "[error]\tsometing went wrong while sending SET_LIGHT to %s" % light_bulb
 
 
