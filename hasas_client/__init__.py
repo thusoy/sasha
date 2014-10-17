@@ -154,7 +154,7 @@ class Client(object):
         prefixed with `http_`.
         """
         self.app.add_url_rule('/actuator/<actuator_id>', 'run_actuator', self.http_run_actuator, methods=['POST'])
-        self.app.add_url_rule('/registry-updated', 'registry_update', self.registry_update, methods=["POST"])
+        self.app.add_url_rule('/registry-updated', 'registry_update', self.http_registry_update, methods=["POST"])
 
 
     def http_registry_update(self):
