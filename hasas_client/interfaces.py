@@ -58,3 +58,6 @@ class LightBulbActuator(Actuator):
         """Turn on the light bulb if the parameter light_on is True, otherwise turn light off"""
         self.light_on = bool(light_on)
         print "Turned %s the light." % ("on" if self.light_on else "off")
+        # http://www.raspberrypi.org/forums/viewtopic.php?f=31&t=12530
+        with open("/sys/class/leds/led0/brightness", "w") as fh:
+            fh.write("%d\n" % self.light_on)

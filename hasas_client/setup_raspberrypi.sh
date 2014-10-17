@@ -29,3 +29,8 @@ sudo service pifacecafsysinfo start
 
 # Enable service to run at boot
 sudo update-rc.d pifacecadsysinfo defaults
+
+
+# Disable trigger for led0 [default is echo mmc0 >/sys/class/leds/led0/trigger]
+# see http://www.raspberrypi.org/forums/viewtopic.php?f=31&t=12530
+sudo sh -c "echo none >/sys/class/leds/led0/trigger"
