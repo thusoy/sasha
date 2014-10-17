@@ -238,10 +238,10 @@ class LightBulbClient(Client):
 
 
     def toggle_lights(self):
-        self.lights_on = not self.lights_on
+        self.light_on = not self.light_on
         import pifacecad
         cad = pifacecad.PiFaceCAD()
-        cad.lcd.backlight_on() if self.lights_on else cad.lcd.backlight_off()
+        cad.lcd.backlight_on() if self.light_on else cad.lcd.backlight_off()
 
 
 def parse_args():
