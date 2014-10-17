@@ -196,21 +196,18 @@ class LightBulbClient(Client):
     def tear_down(self):
         self.listener.deactivate()
 
-    def broadcast_light_change(self, light_on=False):
+    def broadcast_light_change(self):
         """Message all associated light bulbs to turn on / off based on parameter light_on"""
-        self.light_on = bool(light_on)
-
         payoad = {
             "action": "SET_LIGHT",
             "kwargs": {
-                "light_on": light_on
+                "light_on": bool(self.light_on)
             }
         }
         headers = {'Content-Type': 'application/json'}
 
         for light_bulb in self.light_bulbs:
             requests.post(light_bulb, data=json.dumps(payoad), headers=headers)
-            light_bulb.do("SET_LIGHT", light_on);
 
         print "Turned %s the associated light bulbs." % ("on" if self.light_on else "off")
 
@@ -249,7 +246,7 @@ class LightBulbClient(Client):
         import pifacecad
         cad = pifacecad.PiFaceCAD()
         cad.lcd.backlight_on() if self.light_on else cad.lcd.backlight_off()
-        self.broadcast_light_change(self, light_on=self.light_on)
+        self.broadcast_light_change()
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='hasas_client')
