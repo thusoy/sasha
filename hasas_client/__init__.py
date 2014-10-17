@@ -79,10 +79,15 @@ class Client(object):
         }
 
         headers = {'Content-Type': 'application/json'}
-        r = requests.post(self.register_url, data=json.dumps(payload), headers=headers)
+        try:
+            r = requests.post(self.register_url, data=json.dumps(payload), headers=headers, timeout=1)
+        except requests.exeptions.RequestException:
+            print "[error]\tsomething went wrong while connecting to master"
+            sys.exit(1)
         if not r.ok:
             print 'Handshake with master failed, terminating...'
             sys.exit(1)
+
         response = r.json()
 
         self.certificate_url = response['certificate_url']
@@ -98,14 +103,18 @@ class Client(object):
             return
 
         for _ in xrange (backoff_interval):
-            print "Requesting certificate from %s" % (self.certificate_url)
-            r = requests.get(self.certificate_url)
-            if r.status_code == requests.codes.ok:
-                self.certificate = r.text
-                print "Received certificate from %s" % (self.certificate_url)
-                return
+            print "[info]\trequesting certificate from %s (master)" % (self.certificate_url)
+            try:
+                r = requests.get(self.certificate_url)
+            except requests.exeptions.RequestException:
+                print "[warning]\tcould not collect certificate from master"
             else:
-                time.sleep(backoff_interval)
+                if r.ok:
+                    self.certificate = r.text
+                    print "[info]\treceived certificate from %s (master)" % (self.certificate_url)
+                    return
+                else:
+                    time.sleep(backoff_interval)
         if not self.certificate:
             self.collect_certificate(backoff_interval*2)
 
