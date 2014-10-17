@@ -223,7 +223,7 @@ class LightBulbClient(Client):
 
     def get_piface_switch_event_listener(self):
         import pifacecad
-        cad = pifacecad.PiFaceCAD
+        cad = pifacecad.PiFaceCAD()
         listener = pifacecad.SwitchEventListener(chip=cad)
         for i in xrange(8):
             listener.register(i, pifacecad.IODIR_FALLING_EDGE, self.piface_switch_event_handler)
@@ -240,7 +240,7 @@ class LightBulbClient(Client):
     def toggle_lights(self):
         self.lights_on = not self.lights_on
         import pifacecad
-        cad = pifacecad.PiFaceCAD
+        cad = pifacecad.PiFaceCAD()
         cad.lcd.backlight_on() if self.lights_on else cad.lcd.backlight_off()
 
 
