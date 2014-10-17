@@ -124,10 +124,13 @@ class Client(object):
             # Throws error on timeout, must have fallback!
             try:
                 requests.post(self.checkin_url, data=json.dumps(payload), timeout=1, headers=headers)
-                print "%s sent to %s" % (payload, self.checkin_url)
+                print "[info]\tdo_checkin sent payload %s to %s" % (payload, self.checkin_url)
                 backoff = 0
-            except requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout:
-                print "request timed out"
+            except requests.exceptions.Timeout:
+                print "[error]\ttimeout occured in do_checkins"
+                backoff += 1
+            except requests.exeptions.RequestException:
+                print "[error]\tsomething went wrong in do_checkins"
                 backoff += 1
 
 
@@ -198,24 +201,27 @@ class LightBulbClient(Client):
         }
         headers = {'Content-Type': 'application/json'}
 
+        print "[info]\tturning associated light bulbs %s..." % ("on" if self.light_on else "off")
         for light_bulb in self.light_bulbs:
             try:
                 requests.post(light_bulb, data=json.dumps(payoad), headers=headers)
-                print "[broadcast success]\t%s" % light_bulb
-            except requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout:
-                print "[broadcast fail]\t%s" % light_bulb
+                print "[info]\tSET_LIGHT success for %s" % light_bulb
+            except requests.exceptions.Timeout:
+                print "[error]\tSET_LIGHT timeout for %s" % light_bulb
+            except requests.exeptions.RequestException:
+                print "[error]\tsometing went wrong while sending SET_LIGHT to %s" % light_bulb
 
-        print "Turned %s the associated light bulbs." % ("on" if self.light_on else "off")
 
 
     def http_registry_update(self):
         light_bulbs = []
         payload = flask.request.json or {}
+        print "[info]\treceived registry update - clearing registry"
         for unit in payload.get('units', []):
             if unit.get('unit_type') == "LIGHT_BULB":
                 for actuator in unit.get('actuators', []):
                     if actuator["data"].get('type') == "LIGHT_BULB":
-                        print "[registry update]\t%s" % "http://%s/actuator/%s" % (unit['ip'], actuator['id'])
+                        print "[info]\t%s added to registry" % "http://%s/actuator/%s" % (unit['ip'], actuator['id'])
                         light_bulbs.append('http://%s/actuator/%s' % (unit['ip'], actuator['id']))
 
         self.light_bulbs = light_bulbs
@@ -236,7 +242,7 @@ class LightBulbClient(Client):
         if event.pin_num == 0:
             self.toggle_lights()
         else:
-            print "Ignored piface event for interface %d" % event.pin_num
+            print "[warning]\tignored piface event for pin %d" % event.pin_num
 
 
     def toggle_lights(self):
