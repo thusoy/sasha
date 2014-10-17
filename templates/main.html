@@ -50,8 +50,8 @@
 
 <h2>My units</h2>
 <table class="table">
-    <tr><th>Alias</th><th>Description</th><th>IP</th><th>Unit type</th><th>Last checkin</th><th>Actions</th><th>Slett</th></tr>
-    {% for unit in approved_units %}
+    <tr><th>Alias</th><th>Description</th><th>IP</th><th>Unit type</th><th>State</th><th>Last checkin</th><th>Actions</th><th>Slett</th></tr>
+    {% for unit in operational_units %}
         <tr>
             <td>
                 <input type="text" name="alias" value="{{ unit.alias }}" form="update-unit-form-{{ loop.index }}">
@@ -61,6 +61,7 @@
             </td>
             <td>{{ unit.ip }}</td>
             <td>{{ unit.unit_type }}</td>
+            <td>{{ unit.state }}</td>
             <td>{{ unit.last_checkin.strftime('%H:%M:%S') if unit.last_checkin else 'Not heard from yet'}}</td>
             <td>
                 <form method="post" action="{{ url_for('update_unit', unit_id=unit.id) }}" class="form-inline" id="update-unit-form-{{ loop.index }}">
@@ -79,7 +80,7 @@
 <h2>Associations</h2>
 <table class="table">
     <tr><th>Device</th><th>Associated to</th></tr>
-    {% for unit in approved_units %}
+    {% for unit in operational_units %}
         <tr>
             <td>{{ unit.alias }}</td>
             <td>
@@ -87,7 +88,7 @@
                     <input type="hidden" value="{{ unit.id }}" name="unit_id">
                     <select style="width: 140px" name="other_unit">
                         <option value="">None</option>
-                        {% for other_unit in approved_units if other_unit.id != unit.id %}
+                        {% for other_unit in operational_units if other_unit.id != unit.id %}
                             <option value="{{ other_unit.id }}" {{ 'selected' if other_unit.id == unit.associated_to_id }}>{{ other_unit.alias }}</option>
                         {% endfor %}
                     </select>

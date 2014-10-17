@@ -2,9 +2,14 @@ from flask import Flask, request, abort, render_template, flash, redirect, url_f
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import url_decode
 import json
+import threading
+import time
 import requests
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+
+# Used to keep track of whether the main thread wants to quit
+_terminate = False
 
 
 class MethodRewriteMiddleware(object):
@@ -109,9 +114,9 @@ def register_unit():
 
 @app.route('/')
 def main():
-    approved_units = Unit.query.filter(Unit.state=='approved').all()
+    operational_units = Unit.query.filter(Unit.state!='not-approved').all()
     unapproved_units = Unit.query.filter(Unit.state=='not-approved').all()
-    return render_template('main.html', approved_units=approved_units, unapproved_units=unapproved_units)
+    return render_template('main.html', operational_units=operational_units, unapproved_units=unapproved_units)
 
 
 @app.route('/registry')
@@ -150,11 +155,14 @@ def unit_checkin():
     if not unit_id:
         abort(400)
     unit = Unit.query.get_or_404(unit_id)
-    if not unit.state == 'approved':
+    if unit.state == 'not-approved':
         abort(400)
-    if unit.ip != unit_ip or not unit.last_checkin:
+    if unit.ip != unit_ip or not unit.last_checkin or unit.state == 'gone':
         changes = True
     unit.ip = unit_ip
+    if unit.state == 'gone':
+        print 'Unit %d (%s) is back up!' % (unit.id, unit.alias)
+    unit.state = 'ok'
     unit.last_checkin = datetime.utcnow()
     db.session.commit()
     if changes:
@@ -165,7 +173,7 @@ def unit_checkin():
 
 
 def notify_units_of_registry_update():
-    units = Unit.query.filter(Unit.state=='approved').all()
+    units = Unit.query.filter(Unit.state=='ok').all()
     headers = {'content-type': 'application/json'}
     for unit in units:
         try:
@@ -239,6 +247,30 @@ def certificate(unit_id):
     return os.urandom(30).encode('hex')
 
 
+def watch_for_dead_units():
+    time.sleep(30)
+    while not _terminate:
+        print '[housekeeping] Scanning for dead units...'
+        changes = False
+        units = Unit.query.filter((Unit.state=='ok') | (Unit.state=='approved')).all()
+        for unit in units:
+            if unit.last_checkin:
+                now = datetime.utcnow()
+                print "[housekeeping]", now - unit.last_checkin
+                if now - unit.last_checkin > timedelta(minutes=1):
+                    unit.state = 'gone'
+                    print '[housekeeping] Unit %d (%s) considered dead, last heard from %s' % (unit.id, unit.alias, unit.last_checkin)
+                    changes = True
+        if changes:
+            db.session.commit()
+        time.sleep(30)
+
+
 if __name__ == '__main__':
     db.create_all()
+
+    housekeeping_thread = threading.Thread(target=watch_for_dead_units)
+    housekeeping_thread.start()
+
     app.run(debug=True, host='0.0.0.0', port=80)
+    _terminate = True
