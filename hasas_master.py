@@ -142,6 +142,7 @@ def update_unit(unit_id):
 
 @app.route('/checkin', methods=['POST'])
 def unit_checkin():
+    changes = False
     unit_ip = request.access_route[0]
     data = request.json or {}
     unit_id = data.get('unit_id')
@@ -151,10 +152,13 @@ def unit_checkin():
     unit = Unit.query.get_or_404(unit_id)
     if not unit.state == 'approved':
         abort(400)
+    if unit.ip != unit_ip or not unit.last_checkin:
+        changes = True
     unit.ip = unit_ip
     unit.last_checkin = datetime.utcnow()
     db.session.commit()
-    notify_units_of_registry_update()
+    if changes:
+        notify_units_of_registry_update()
     return jsonify({
         'status': 'OK!',
     })
@@ -181,6 +185,7 @@ def delete_unit(unit_id):
     db.session.delete(unit)
     db.session.commit()
     flash('Unit deleted!', 'info')
+    notify_units_of_registry_update()
     if wants_json():
         return jsonify({
             '_meta': {
@@ -215,6 +220,7 @@ def connect_units():
     else:
         unit.associated_to = None
         flash('Removed associatation from %s' % unit.alias, 'info')
+    notify_units_of_registry_update()
     db.session.commit()
     return redirect(url_for('main'))
 
