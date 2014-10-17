@@ -50,10 +50,9 @@
 
 <h2>My units</h2>
 <table class="table">
-    <tr><th>ID</th><th>Alias</th><th>Description</th><th>IP</th><th>Public key</th><th>Unit type</th><th>Last checkin</th><th>Actions</th><th>Slett</th></tr>
+    <tr><th>Alias</th><th>Description</th><th>IP</th><th>Unit type</th><th>Last checkin</th><th>Actions</th><th>Slett</th></tr>
     {% for unit in approved_units %}
         <tr>
-            <td>{{ unit.id }}</td>
             <td>
                 <input type="text" name="alias" value="{{ unit.alias }}" form="update-unit-form-{{ loop.index }}">
             </td>
@@ -61,7 +60,6 @@
                 <input type="text" name="description" value="{{ unit.description }}" form="update-unit-form-{{ loop.index }}">
             </td>
             <td>{{ unit.ip }}</td>
-            <td>{{ unit.certificate }}</td>
             <td>{{ unit.unit_type }}</td>
             <td>{{ unit.last_checkin.strftime('%H:%M:%S') if unit.last_checkin else 'Not heard from yet'}}</td>
             <td>
