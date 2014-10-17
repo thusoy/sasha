@@ -5,10 +5,9 @@ import json
 
 class Actuator(object):
 
-    do = {}
-
     def __init__(self, interface_id):
         self.interface_id = interface_id
+        self.do = {}
 
 
     def describe(self):
@@ -49,7 +48,7 @@ class LightBulbActuator(Actuator):
     def __init__(self, *args, **kwargs):
         super(LightBulbActuator, self).__init__(*args, **kwargs)
         self.light_on = False
-        do = {
+        self.do = {
             "SET_LIGHT": self.set_light
         }
 
