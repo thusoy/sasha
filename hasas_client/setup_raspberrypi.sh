@@ -15,7 +15,7 @@ sudo apt-get install python-pip -y
 sudo pip install -r requirements.txt
 
 # Generate private- and public keys
-sudo ./client/genkeys.sh
+sudo ./hasas_client/genkeys.sh
 
 # Install PiFace
 sudo apt-get install python-pifaced
