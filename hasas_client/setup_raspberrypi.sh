@@ -2,20 +2,19 @@
 
 set -e
 
-# Update and upgrade
-sudo apt-get update
-sudo apt-get upgrade -y
+# Update and upgrade, commented out for now since it's awful slow
+#sudo apt-get update
+#sudo apt-get upgrade -y
 
 # Download files
 git clone https://github.com/thusoy/hasas
-cd hasas
 
 # Install pip and requirements
 sudo apt-get install python-pip -y
-sudo pip install -r requirements.txt
+sudo pip install -e ./hasas
 
 # Generate private- and public keys
-sudo ./hasas_client/genkeys.sh
+sudo ./hasas/hasas_client/genkeys.sh
 
 # Install PiFace
 sudo apt-get install python-pifaced
@@ -27,5 +26,6 @@ sudo modprobe spi-bmc2708
 
 # Start the sysinfo service
 sudo service pifacecafsysinfo start
+
 # Enable service to run at boot
 sudo update-rc.d pifacecadsysinfo defaults
