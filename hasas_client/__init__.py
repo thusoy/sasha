@@ -143,7 +143,7 @@ class Client(object):
 
 
 
-            sleeptime = min(self.checkin_frequency * 2**backoff, 60*15)
+            sleeptime = min(self.checkin_frequency * 2**backoff, 60)
             time.sleep(sleeptime)
         print('Got terminate signal, stopping...')
 
