@@ -24,6 +24,7 @@ class Client(object):
     def __init__(self, master, config_file):
         # Read from config.ini / pub- and priv-key files etc ??
         self.id = None
+        self.app = flask.Flask(__name__)
         self.unit_type = None
         self.checkin_frequency = None
         self.priv_key = ".ssh/id_rsa"
@@ -139,38 +140,32 @@ class Client(object):
             sleeptime = min(self.checkin_frequency * 2**backoff, 60*15)
             time.sleep(sleeptime)
 
-    def registry_update(self):
+
+    def configure_url_routes(self):
+        """ Registers url routes on `self.app`. By convention, keep methods that are hit by HTTP
+        prefixed with `http_`.
+        """
+        self.app.add_url_rule('/actuator/<actuator_id>', 'run_actuator', self.http_run_actuator, methods=['POST'])
+        self.app.add_url_rule('/registry-updated', 'registry_update', self.registry_update, methods=["POST"])
+
+
+    def http_registry_update(self):
         return flask.jsonify({
             'status': 'OK',
         })
 
-    def do_listen(self):
-        app = flask.Flask(__name__)
 
-        #post: /if0 {SET_TEMPERATURE, {'temperature'=13}}
-
-        @app.route('/actuator/<actuator_id>', methods=['POST'])
-        def run_actuator(actuator_id):
-            actuator = self.actuators.get(actuator_id)
-            if not actuator:
-                abort(400)
-            payload = flask.request.json or {}
-            action = payload.get('action')
-            args = payload.get('args', [])
-            kwargs = payload.get('kwargs', {})
-            if not action and (args or kwargs):
-                abort(400)
-            actuator.actuate(action, *args, **kwargs)
-
-        @app.route('/')
-        def main():
-            return flask.jsonify({
-                'response': 'Got it'
-            })
-
-        app.add_url_rule('/registry-updated', 'registry_update', self.registry_update, methods=["POST"])
-
-        app.run(host="0.0.0.0", port=80)
+    def http_run_actuator(self, actuator_id):
+        actuator = self.actuators.get(actuator_id)
+        if not actuator:
+            abort(400)
+        payload = flask.request.json or {}
+        action = payload.get('action')
+        args = payload.get('args', [])
+        kwargs = payload.get('kwargs', {})
+        if not action and (args or kwargs):
+            abort(400)
+        actuator.actuate(action, *args, **kwargs)
 
 
     def read(self):
@@ -207,8 +202,7 @@ class LightBulbClient(Client):
         print "Turned %s the associated light bulbs." % ("on" if self.light_on else "off")
 
 
-    def registry_update(self):
-
+    def http_registry_update(self):
         light_bulbs = []
         payload = flask.request.json or {}
         for unit in payload.get('units', []):
@@ -242,7 +236,6 @@ def main():
     client = client_class(args.master, args.config)
     client.setup()
     checkin = threading.Thread(target=client.do_checkins)
-    callback = threading.Thread(target=client.do_listen)
 
     checkin.start()
-    callback.start()
+    client.app.run(port=80, host='0.0.0.0', debug=True)
