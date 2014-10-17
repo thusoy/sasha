@@ -174,6 +174,9 @@ class Client(object):
         if not action and (args or kwargs):
             abort(400)
         actuator.actuate(action, *args, **kwargs)
+        return flask.jsonify({
+            'status': 'OK',
+        })
 
 
     def read(self):
@@ -195,6 +198,7 @@ class LightBulbClient(Client):
 
     def tear_down(self):
         self.listener.deactivate()
+
 
     def broadcast_light_change(self):
         """Message all associated light bulbs to turn on / off based on parameter light_on"""
@@ -225,6 +229,7 @@ class LightBulbClient(Client):
 
         return super(LightBulbClient, self).http_registry_update()
 
+
     def get_piface_switch_event_listener(self):
         import pifacecad
         cad = pifacecad.PiFaceCAD()
@@ -247,6 +252,7 @@ class LightBulbClient(Client):
         cad = pifacecad.PiFaceCAD()
         cad.lcd.backlight_on() if self.light_on else cad.lcd.backlight_off()
         self.broadcast_light_change()
+
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='hasas_client')
