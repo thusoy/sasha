@@ -55,6 +55,9 @@ class Client(object):
             self.sensors[interface] = klass(interface)
 
 
+    def tear_down(self):
+        pass
+
 
     def setup(self):
         with open(os.path.expanduser(os.path.join('~', '.ssh', 'id_rsa.csr'))) as csr_fh:
@@ -187,7 +190,8 @@ class LightBulbClient(Client):
         self.listener = self.get_piface_switch_event_listener()
         self.listener.activate()
 
-
+    def tear_down(self):
+        self.listener.deactivate()
 
     def set_light(self, light_on=False):
         """Message all associated light bulbs to turn on / off based on parameter light_on"""
@@ -268,3 +272,4 @@ def main():
     checkin.start()
     client.app.run(port=80, host='0.0.0.0', debug=True)
     client.terminate = True
+    client.tear_down()
