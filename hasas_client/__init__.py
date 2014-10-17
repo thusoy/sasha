@@ -85,6 +85,7 @@ class Client(object):
             r = None
         if not r or not r.ok:
             print "[error]\tsomething went wrong while connecting to master, terminating..."
+            self.tear_down()
             sys.exit(1)
 
         response = r.json()
