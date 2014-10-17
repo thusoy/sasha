@@ -82,9 +82,8 @@ class Client(object):
         try:
             r = requests.post(self.register_url, data=json.dumps(payload), headers=headers, timeout=1)
         except requests.exceptions.RequestException:
-            print "[error]\tsomething went wrong while connecting to master, terminating..."
-            sys.exit(1)
-        if not r.ok:
+            r = None
+        if not r or not r.ok:
             print "[error]\tsomething went wrong while connecting to master, terminating..."
             sys.exit(1)
 
