@@ -38,7 +38,6 @@ class Client(object):
         self.register_url = "http://%s/register-unit" % master
         self.checkin_url = None
         self.registry_url = None
-        self.registry = []
 
         # Read config.ini
         with open(config_file) as config_fh:
