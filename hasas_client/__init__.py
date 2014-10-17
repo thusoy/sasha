@@ -193,7 +193,7 @@ class LightBulbClient(Client):
     def tear_down(self):
         self.listener.deactivate()
 
-    def set_light(self, light_on=False):
+    def broadcast_light_change(self, light_on=False):
         """Message all associated light bulbs to turn on / off based on parameter light_on"""
         self.light_on = bool(light_on)
 
@@ -246,7 +246,7 @@ class LightBulbClient(Client):
         import pifacecad
         cad = pifacecad.PiFaceCAD()
         cad.lcd.backlight_on() if self.light_on else cad.lcd.backlight_off()
-
+        self.broadcast_light_change(self, light_on=self.light_on)
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='hasas_client')
