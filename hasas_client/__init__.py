@@ -211,7 +211,11 @@ class LightBulbClient(Client):
         headers = {'Content-Type': 'application/json'}
 
         for light_bulb in self.light_bulbs:
-            requests.post(light_bulb, data=json.dumps(payoad), headers=headers)
+            try:
+                requests.post(light_bulb, data=json.dumps(payoad), headers=headers)
+                print "[broadcast success]\t%s" % light_bulb
+            except requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout:
+                print "[broadcast fail]\t%s" % light_bulb
 
         print "Turned %s the associated light bulbs." % ("on" if self.light_on else "off")
 
@@ -223,6 +227,7 @@ class LightBulbClient(Client):
             if unit.get('unit_type') == "LIGHT_BULB":
                 for actuator in unit.get('actuators', []):
                     if actuator["data"].get('type') == "LIGHT_BULB":
+                        print "[registry update]\t%s" % "http://%s/actuator/%s" % (unit['ip'], actuator['id'])
                         light_bulbs.append('http://%s/actuator/%s' % (unit['ip'], actuator['id']))
 
         self.light_bulbs = light_bulbs
