@@ -183,6 +183,10 @@ class LightBulbClient(Client):
     def __init__(self, *args, **kwargs):
         super(LightBulbClient, self).__init__(*args, **kwargs)
         self.light_bulbs = []
+        self.light_on = False
+        self.listener = self.get_piface_switch_event_listener()
+        self.listener.activate()
+
 
 
     def set_light(self, light_on=False):
@@ -216,6 +220,28 @@ class LightBulbClient(Client):
         self.light_bulbs = light_bulbs
 
         return super(LightBulbClient, self).registry_update()
+
+    def get_piface_switch_event_listener(self):
+        import pifacecad
+        cad = pifacecad.PiFaceCAD
+        listener = pifacecad.SwitchEventListener(chip=cad)
+        for i in xrange(8):
+            listener.register(i, pifacecad.IODIR_FALLING_EDGE, self.piface_switch_event_handler)
+        return listener
+
+
+    def piface_switch_event_handler(self, event):
+        if event.pin_num == 0:
+            self.toggle_lights()
+        else:
+            print "Ignored piface event for interface %d" % event.pin_num
+
+
+    def toggle_lights(self):
+        self.lights_on = not self.lights_on
+        import pifacecad
+        cad = pifacecad.PiFaceCAD
+        cad.lcd.backlight_on() if self.lights_on else cad.lcd.backlight_off()
 
 
 def parse_args():
