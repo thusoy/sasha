@@ -31,6 +31,9 @@ class Client(object):
         self.priv_key = ".ssh/id_rsa"
         self.certificate = None
 
+        # setup url handlers
+        self.configure_url_routes()
+
         # Replace with NFC discovery ??
         self.register_url = "http://%s/register-unit" % master
         self.checkin_url = None
