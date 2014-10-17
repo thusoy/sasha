@@ -24,6 +24,7 @@ class Client(object):
     def __init__(self, master, config_file):
         # Read from config.ini / pub- and priv-key files etc ??
         self.id = None
+        self.terminate = False
         self.app = flask.Flask(__name__)
         self.unit_type = None
         self.checkin_frequency = None
@@ -117,7 +118,7 @@ class Client(object):
 
     def do_checkins(self):
         backoff = 0
-        while True:
+        while not self.terminate:
             payload = {
                 'unit_id': self.id,
                 'readings': {
@@ -139,6 +140,7 @@ class Client(object):
 
             sleeptime = min(self.checkin_frequency * 2**backoff, 60*15)
             time.sleep(sleeptime)
+        print('Got terminate signal, stopping...')
 
 
     def configure_url_routes(self):
@@ -239,3 +241,4 @@ def main():
 
     checkin.start()
     client.app.run(port=80, host='0.0.0.0', debug=True)
+    client.terminate = True
