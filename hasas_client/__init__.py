@@ -92,7 +92,7 @@ class Client(object):
         self.id = response['id']
 
         self.collect_certificate()
-        self.populate_registry()
+
 
     def collect_certificate(self, backoff_interval=1):
         if backoff_interval > 9 or backoff_interval < 1:
@@ -110,17 +110,6 @@ class Client(object):
         if not self.certificate:
             self.collect_certificate(backoff_interval*2)
 
-    def populate_registry(self):
-        r = requests.get(self.registry_url, timeout=5)
-        if r.status_code == requests.codes.ok:
-            response = r.json()
-            self.registry = response['units'];
-        print "Found %d other devices" % len(self.registry)
-
-
-    def add_to_registry(self, unit):
-        pass
-
 
     def do_checkins(self):
         backoff = 0
@@ -135,7 +124,7 @@ class Client(object):
 
             # Throws error on timeout, must have fallback!
             try:
-                requests.post(self.checkin_url, data=json.dumps(payload), timeout=5, headers=headers)
+                requests.post(self.checkin_url, data=json.dumps(payload), timeout=1, headers=headers)
                 print "%s sent to %s" % (payload, self.checkin_url)
                 backoff = 0
             except requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout:
