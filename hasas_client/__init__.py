@@ -223,7 +223,7 @@ class LightBulbClient(Client):
 
         self.light_bulbs = light_bulbs
 
-        return super(LightBulbClient, self).registry_update()
+        return super(LightBulbClient, self).http_registry_update()
 
     def get_piface_switch_event_listener(self):
         import pifacecad
