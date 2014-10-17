@@ -226,16 +226,22 @@ class LightBulbClient(Client):
         light_bulbs = []
         payload = flask.request.json or {}
         print "[info]\treceived registry update - clearing registry"
-        for unit in payload.get('units', []):
-            if unit.get('unit_type') == "LIGHT_BULB":
-                for actuator in unit.get('actuators', []):
-                    if actuator["data"].get('type') == "LIGHT_BULB":
-                        print "[info]\t%s added to registry" % "http://%s/actuator/%s" % (unit['ip'], actuator['id'])
-                        light_bulbs.append('http://%s/actuator/%s' % (unit['ip'], actuator['id']))
 
-        self.light_bulbs = light_bulbs
+        units = payload.get('units', [])
+        self.light_bulbs = self.get_interfaces_by_type(units, "LIGHT_BULB", "LIGHT_BULB")
+        print "[info]\tassociates updated: %s" % ", ".join(self.light_bulbs)
 
         return super(LightBulbClient, self).http_registry_update()
+
+
+    def get_interfaces_by_type(self, units, unit_type, interface_type):
+        matches = []
+        for unit in units:
+            if unit.get('unit_type') == unit_type:
+                for actuator in unit.get('actuators', []):
+                    if actuator["data"].get('type') == interface_type:
+                        matches.append('http://%s/actuator/%s' % (unit['ip'], actuator['id']))
+        return matches
 
 
     def get_piface_switch_event_listener(self):
