@@ -43,7 +43,7 @@ def wants_json():
 
 class Unit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    alias = db.Column(db.String(50))
+    alias = db.Column(db.String(50), default='')
     description = db.Column(db.Text())
     ip = db.Column(db.String(46))
     unit_type = db.Column(db.String(30))
