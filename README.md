@@ -1,4 +1,4 @@
-hasas
+sasha
 =====
 
 Home automation with RPis.
@@ -8,8 +8,8 @@ Local development
 
     $ virtualenv venv
     $ . venv/bin/activate
-    $ pip install -r requirements.txt
+    $ pip install -e .[master]
 
 Start the master:
 
-    $ python hasas_master.py
+    $ sasha-master

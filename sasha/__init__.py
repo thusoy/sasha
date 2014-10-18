@@ -269,10 +269,10 @@ class LightBulbClient(Client):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog='hasas_client')
+    parser = argparse.ArgumentParser(prog='sasha')
     parser.add_argument('master',
         metavar='<master>',
-        default='hasas.zza.no')
+        default='sasha.zza.no')
     parser.add_argument('-c', '--config',
         metavar='<config-file>',
         default='config.json')
@@ -283,7 +283,7 @@ def main():
     args = parse_args()
     with open(args.config) as config_fh:
         config = json.load(config_fh)
-        client_class_name = config.get('client_class', 'hasas_client.Client')
+        client_class_name = config.get('client_class', 'sasha.Client')
         client_class = load_class_from_module(client_class_name)
     client = client_class(args.master, args.config)
     client.setup()

@@ -53,5 +53,5 @@ docs/_build/
 # PyBuilder
 target/
 
-hasas-db.sqlite
+db-dev.sqlite
 venv

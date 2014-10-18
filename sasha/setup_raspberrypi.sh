@@ -7,14 +7,14 @@ set -e
 #sudo apt-get upgrade -y
 
 # Download files
-git clone https://github.com/thusoy/hasas
+git clone https://github.com/thusoy/sasha
 
 # Install pip and requirements
 sudo apt-get install python-pip -y
-sudo pip install -e ./hasas
+sudo pip install -e ./sasha
 
 # Generate private- and public keys
-sudo ./hasas/hasas_client/genkeys.sh
+sudo ./sasha/sasha/genkeys.sh
 
 # Install PiFace
 sudo apt-get install python-pifaced

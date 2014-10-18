@@ -31,7 +31,7 @@ app = Flask(__name__)
 my_ip = requests.get('http://httpbin.org/ip').json()['origin']
 print('Running on %s' % my_ip)
 app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hasas-db.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../db-dev.sqlite'
 app.config['SECRET_KEY'] = 'supersecret'
 app.config['SERVER_NAME'] = my_ip
 app.config['PREFERRED_URL_SCHEME'] = 'https'
@@ -266,11 +266,15 @@ def watch_for_dead_units():
         time.sleep(30)
 
 
-if __name__ == '__main__':
+def main():
+    ''' CLI entry-point for running master. '''
     db.create_all()
 
     housekeeping_thread = threading.Thread(target=watch_for_dead_units)
+    housekeeping_thread.daemon = True
     housekeeping_thread.start()
-
-    app.run(debug=True, host='0.0.0.0', port=80)
-    _terminate = True
+    try:
+        app.run(debug=True, host='0.0.0.0', port=80)
+    except KeyboardInterrupt:
+        _terminate = True
+        raise
