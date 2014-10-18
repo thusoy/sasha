@@ -1,30 +1,38 @@
-import random
-import time
-import json
-
+import inspect
 
 class Actuator(object):
 
+    type = 'NULL-ACTUATOR'
+    actions = {}
+
     def __init__(self, interface_id):
         self.interface_id = interface_id
-        self.do = {}
+        self._actions = {}
+        for action_name, method_name in self.actions.items():
+            method = getattr(self, method_name)
+            assert method is not None, "No method named %s found" % method_name
+            self._actions[action_name] = method
 
 
     def describe(self):
+        actions = []
+        for action_name, method in self._actions.items():
+            argspec = inspect.getargspec(method)
+            actions.append({
+                'name': action_name,
+                'description': method.__doc__,
+                'params': argspec.args[1:],
+            })
         return {
             "id": self.interface_id,
             "type": self.type,
             "description": self.__doc__,
-            "actions": [{
-                "name": action,
-                "description": self.do[action].__doc__,
-                "params": self.do[action].func_code.co_varnames[1:]
-            } for action in self.do]
+            "actions": actions,
         }
 
     def actuate(self, action, *args, **kwargs):
         try:
-            self.do[action](*args, **kwargs)
+            self._actions[action](*args, **kwargs)
         except KeyError:
             print "unknown action"
 
@@ -37,20 +45,20 @@ class Sensor(object):
             "type": self.type,
             "description": self.__doc__,
         }
-        print self.__doc__
 
 
 class LightBulbActuator(Actuator):
-    """Set the status of a light bulb"""
+    """A simple on/off light bulb."""
 
     type = "LIGHT_BULB"
+
+    actions = {
+        'SET-LIGHT': 'set_light',
+    }
 
     def __init__(self, *args, **kwargs):
         super(LightBulbActuator, self).__init__(*args, **kwargs)
         self.light_on = False
-        self.do = {
-            "SET_LIGHT": self.set_light
-        }
 
 
     def set_light(self, light_on=False):
