@@ -70,6 +70,8 @@ class LightBulbActuator(Actuator):
     def set_light(self, light_on=False):
         """Turn on the light bulb if the parameter light_on is True, otherwise turn light off"""
 
+        GPIO.setmode(GPIO.BCM)
+
         # Setup leds
         for led in self.leds:
             GPIO.setup(led, GPIO.OUT)
@@ -80,6 +82,8 @@ class LightBulbActuator(Actuator):
 
         for led in self.leds:
             GPIO.output(led, True)
+
+        GPIO.cleanup()
 
 
     def buzz(self):
