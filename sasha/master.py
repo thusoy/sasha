@@ -33,7 +33,7 @@ print('Running on %s' % my_ip)
 app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../db-dev.sqlite'
 app.config['SECRET_KEY'] = 'supersecret'
-app.config['SERVER_NAME'] = my_ip
+app.config['SERVER_NAME'] = 'sasha.zza.no'
 app.config['PREFERRED_URL_SCHEME'] = 'https'
 db = SQLAlchemy(app)
 
