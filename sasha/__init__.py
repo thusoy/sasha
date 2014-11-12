@@ -192,6 +192,7 @@ class LightBulbClient(Client):
     def __init__(self, *args, **kwargs):
         super(LightBulbClient, self).__init__(*args, **kwargs)
         self.light_bulbs = []
+        self.buzzers = []
         self.light_on = False
         self.listener = self.get_piface_switch_event_listener()
         self.listener.activate()
