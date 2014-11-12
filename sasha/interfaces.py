@@ -1,4 +1,6 @@
 import inspect
+import time
+import RPi.GPIO as GPIO
 
 class Actuator(object):
 
@@ -54,7 +56,11 @@ class LightBulbActuator(Actuator):
 
     actions = {
         'SET-LIGHT': 'set_light',
+        'BUZZ': 'buzz',
     }
+
+    leds = [4, 17, 22, 10, 9, 11]
+    buzzer = 8
 
     def __init__(self, *args, **kwargs):
         super(LightBulbActuator, self).__init__(*args, **kwargs)
@@ -63,8 +69,29 @@ class LightBulbActuator(Actuator):
 
     def set_light(self, light_on=False):
         """Turn on the light bulb if the parameter light_on is True, otherwise turn light off"""
+
+        # Setup leds
+        for led in self.leds:
+            GPIO.setup(led, GPIO.OUT)
+            GPIO.output(led, False)
+
         self.light_on = bool(light_on)
         print "Turned %s the light." % ("on" if self.light_on else "off")
-        # http://www.raspberrypi.org/forums/viewtopic.php?f=31&t=12530
-        with open("/sys/class/leds/led0/brightness", "w") as fh:
-            fh.write("%d\n" % self.light_on)
+
+        for led in self.leds:
+            GPIO.output(led, True)
+
+
+    def buzz(self):
+        GPIO.setmode(GPIO.BCM)
+
+        # Initialize buzzer
+        GPIO.setup(self.buzzer, GPIO.OUT)
+
+        # Start buzzing
+        GPIO.output(self.buzzer, True)
+        time.sleep(0.2)
+
+        # Stop buzzing
+        GPIO.output(self.buzzer, False)
+        GPIO.cleanup()

@@ -256,8 +256,27 @@ class LightBulbClient(Client):
     def piface_switch_event_handler(self, event):
         if event.pin_num == 0:
             self.toggle_lights()
+        elif event.pin_num == 1:
+            self.buzz()
         else:
             print "[warning]\tignored piface event for pin %d" % event.pin_num
+
+
+    def buzz(self):
+        """Message all associated light bulbs to turn on / off based on parameter light_on"""
+        payoad = {
+            "action": "BUZZ",
+        }
+        headers = {'Content-Type': 'application/json'}
+        print "[info]\tBuzzing on associated light bulbs..."
+        for light_bulb in self.light_bulbs:
+            try:
+                requests.post(light_bulb, data=json.dumps(payoad), headers=headers)
+                print "[info]\tBUZZ success for %s" % light_bulb
+            except requests.exceptions.Timeout:
+                print "[error]\tBUZZ timeout for %s" % light_bulb
+            except requests.exceptions.RequestException:
+                print "[error]\tsometing went wrong while sending BUZZ to %s" % light_bulb
 
 
     def toggle_lights(self):
