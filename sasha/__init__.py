@@ -229,7 +229,9 @@ class LightBulbClient(Client):
 
         units = payload.get('units', [])
         self.light_bulbs = self.get_interfaces_by_type(units, "LIGHT_BULB", "LIGHT_BULB")
-        print "[info]\tassociates updated: %s" % ", ".join(self.light_bulbs)
+        self.buzzers = self.get_interfaces_by_type(units, "LIGHT_BULB", "BUZZER")
+
+        print "[info]\tassociates updated: %s" % ", ".join(self.light_bulbs+self.buzzers)
 
         return super(LightBulbClient, self).http_registry_update()
 
@@ -269,14 +271,14 @@ class LightBulbClient(Client):
         }
         headers = {'Content-Type': 'application/json'}
         print "[info]\tBuzzing on associated light bulbs..."
-        for light_bulb in self.light_bulbs:
+        for buzzer in self.buzzers:
             try:
-                requests.post(light_bulb, data=json.dumps(payoad), headers=headers)
-                print "[info]\tBUZZ success for %s" % light_bulb
+                requests.post(buzzer, data=json.dumps(payoad), headers=headers)
+                print "[info]\tBUZZ success for %s" % buzzer
             except requests.exceptions.Timeout:
-                print "[error]\tBUZZ timeout for %s" % light_bulb
+                print "[error]\tBUZZ timeout for %s" % buzzer
             except requests.exceptions.RequestException:
-                print "[error]\tsometing went wrong while sending BUZZ to %s" % light_bulb
+                print "[error]\tsometing went wrong while sending BUZZ to %s" % buzzer
 
 
     def toggle_lights(self):

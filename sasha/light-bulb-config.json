@@ -2,6 +2,7 @@
     "unit_type": "LIGHT_BULB",
     "checkin_frequency": 10,
     "actuators": {
-        "ac0": "sasha.interfaces.LightBulbActuator"
+        "ac0": "sasha.interfaces.LightBulbActuator",
+        "ac1": "sasha.interfaces.BuzzerAcuator"
     }
 }

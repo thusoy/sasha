@@ -55,21 +55,16 @@ class LightBulbActuator(Actuator):
     type = "LIGHT_BULB"
 
     actions = {
-        'SET-LIGHT': 'set_light',
-        'BUZZ': 'buzz',
+        'SET-LIGHT': 'set_light'
     }
 
     leds = [4, 17, 22, 10, 9, 11]
-    buzzer = 8
 
     def __init__(self, *args, **kwargs):
         super(LightBulbActuator, self).__init__(*args, **kwargs)
         self.light_on = False
 
         GPIO.setmode(GPIO.BCM)
-
-        # Initialize buzzer
-        GPIO.setup(self.buzzer, GPIO.OUT)
 
         # Setup leds
         for led in self.leds:
@@ -87,12 +82,28 @@ class LightBulbActuator(Actuator):
             GPIO.output(led, self.light_on)
 
 
-    def buzz(self):
+class BuzzerActuator(Actuator):
+    """A buzzer. Produces a BEEP"""
 
+    type="BUZZER"
+
+    actions = {
+        'BUZZ': 'buzz'
+    }
+
+    buzzer = 8
+
+    def __init__(self, *args, **kwargs):
+        super(BuzzerActuator, self).__init__(*args, **kwargs)
+        GPIO.setmode(GPIO.BCM)
+
+        # Initialize buzzer
+        GPIO.setup(self.buzzer, GPIO.OUT)
+
+    def buzz(self):
         # Start buzzing
         GPIO.output(self.buzzer, True)
         time.sleep(0.2)
 
         # Stop buzzing
         GPIO.output(self.buzzer, False)
-        GPIO.cleanup()
