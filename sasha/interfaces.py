@@ -66,31 +66,28 @@ class LightBulbActuator(Actuator):
         super(LightBulbActuator, self).__init__(*args, **kwargs)
         self.light_on = False
 
-
-    def set_light(self, light_on=False):
-        """Turn on the light bulb if the parameter light_on is True, otherwise turn light off"""
-
         GPIO.setmode(GPIO.BCM)
+
+        # Initialize buzzer
+        GPIO.setup(self.buzzer, GPIO.OUT)
 
         # Setup leds
         for led in self.leds:
             GPIO.setup(led, GPIO.OUT)
             GPIO.output(led, False)
 
+
+    def set_light(self, light_on=False):
+        """Turn on the light bulb if the parameter light_on is True, otherwise turn light off"""
+
         self.light_on = bool(light_on)
         print "Turned %s the light." % ("on" if self.light_on else "off")
 
         for led in self.leds:
-            GPIO.output(led, True)
-
-        GPIO.cleanup()
+            GPIO.output(led, self.light_on)
 
 
     def buzz(self):
-        GPIO.setmode(GPIO.BCM)
-
-        # Initialize buzzer
-        GPIO.setup(self.buzzer, GPIO.OUT)
 
         # Start buzzing
         GPIO.output(self.buzzer, True)
