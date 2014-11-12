@@ -203,7 +203,7 @@ class LightBulbClient(Client):
     def broadcast_light_change(self):
         """Message all associated light bulbs to turn on / off based on parameter light_on"""
         payoad = {
-            "action": "SET_LIGHT",
+            "action": "SET-LIGHT",
             "kwargs": {
                 "light_on": bool(self.light_on)
             }
