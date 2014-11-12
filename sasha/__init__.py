@@ -213,7 +213,7 @@ class LightBulbClient(Client):
         print "[info]\tturning associated light bulbs %s..." % ("on" if self.light_on else "off")
         for light_bulb in self.light_bulbs:
             try:
-                requests.post(light_bulb, data=json.dumps(payoad), headers=headers)
+                requests.post(light_bulb, data=json.dumps(payoad), headers=headers, timeout=2)
                 print "[info]\tSET_LIGHT success for %s" % light_bulb
             except requests.exceptions.Timeout:
                 print "[error]\tSET_LIGHT timeout for %s" % light_bulb
@@ -273,7 +273,7 @@ class LightBulbClient(Client):
         print "[info]\tBuzzing on associated light bulbs..."
         for buzzer in self.buzzers:
             try:
-                requests.post(buzzer, data=json.dumps(payoad), headers=headers)
+                requests.post(buzzer, data=json.dumps(payoad), headers=headers, timeout=2)
                 print "[info]\tBUZZ success for %s" % buzzer
             except requests.exceptions.Timeout:
                 print "[error]\tBUZZ timeout for %s" % buzzer
