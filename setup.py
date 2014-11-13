@@ -11,7 +11,7 @@ setup(
     packages=find_packages(),
     author='Martin Kirkholt Melhus, Tarjei Husøy',
     url='https://github.com/thusoy/sasha',
-    decription='Home automation over HTTP',
+    description='Home automation over HTTP',
     long_description=_long_description,
     install_requires=[
         'flask',
