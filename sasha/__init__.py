@@ -222,6 +222,34 @@ class LightBulbClient(Client):
                 print "[error]\tsometing went wrong while sending SET_LIGHT to %s" % light_bulb
 
 
+    def broadcast_light_shift_left(self):
+        """Message all associated light bulbs to shift current light left"""
+        self.broadcast_light_shift("LEFT");
+
+    def broadcast_light_shift_right(self):
+        """Message all associated light bulbs to shift current light right"""
+        self.broadcast_light_shift("RIGHT");
+
+    def broadcast_light_shift(self, direction):
+        """Message all associated light bulbs to shift current light right"""
+        action = "SHIFT-%s" % direction;
+        payload = {
+            "action": action
+        }
+        headers = {'Content-Type': 'application/json'}
+
+        print "[info]\tturning associated light bulbs %s..." % ("on" if self.light_on else "off")
+        for light_bulb in self.light_bulbs:
+            try:
+                requests.post(light_bulb, data=json.dumps(payoad), headers=headers, timeout=2)
+                print "[info]\t%s success for %s" % (action, light_bulb)
+            except requests.exceptions.Timeout:
+                print "[error]\t%s timeout for %s" % (action, light_bulb)
+            except requests.exceptions.RequestException:
+                print "[error]\tsometing went wrong while sending %s to %s" % (action, light_bulb)
+
+
+
 
     def http_registry_update(self):
         light_bulbs = []
@@ -261,6 +289,10 @@ class LightBulbClient(Client):
             self.toggle_lights()
         elif event.pin_num == 1:
             self.buzz()
+        elif event.pin_num == 6:
+            self.broadcast_light_shift_right()
+        elif event.pin_num == 7:
+            self.broadcast_light_shift_left()
         else:
             print "[warning]\tignored piface event for pin %d" % event.pin_num
 

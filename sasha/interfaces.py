@@ -55,7 +55,9 @@ class LightBulbActuator(Actuator):
     type = "LIGHT_BULB"
 
     actions = {
-        'SET-LIGHT': 'set_light'
+        'SET-LIGHT': 'set_light',
+        'SHIFT-LEFT': 'shift_left',
+        'SHIFT-RIGHT': 'shift_right'
     }
 
     leds = [4, 17, 22, 10, 9, 11]
@@ -63,6 +65,8 @@ class LightBulbActuator(Actuator):
     def __init__(self, *args, **kwargs):
         super(LightBulbActuator, self).__init__(*args, **kwargs)
         self.light_on = False
+        self.current_led = 0
+
 
         GPIO.setmode(GPIO.BCM)
 
@@ -78,8 +82,26 @@ class LightBulbActuator(Actuator):
         self.light_on = bool(light_on)
         print "Turned %s the light." % ("on" if self.light_on else "off")
 
-        for led in self.leds:
-            GPIO.output(led, self.light_on)
+        #for led in self.leds:
+        #    GPIO.output(led, self.light_on)
+        GPIO.output(self.leds[self.current_led], self.light_on)
+
+    def shift_left(self):
+        """Set current light bulb to the light bulb to the left of the current light bulb"""
+
+        GPIO.output(self.leds[self.current_led], False)
+        self.current_led = (self.current_led - 1) % len(self.leds)
+        GPIO.output(self.leds[self.current_led], self.light_on)
+        print "Led shifted left"
+
+
+    def shift_right(self):
+        """Set current light bulb to the light bulb to the left of the current light bulb"""
+
+        GPIO.output(self.leds[self.current_led], False)
+        self.current_led = (self.current_led + 1) % len(self.leds)
+        GPIO.output(self.leds[self.current_led], self.light_on)
+        print "Led shifted right"
 
 
 class BuzzerActuator(Actuator):
