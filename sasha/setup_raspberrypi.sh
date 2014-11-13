@@ -27,7 +27,7 @@ sudo pip install -e ./sasha
 sudo ./sasha/sasha/genkeys.sh
 
 # Install PiFace
-sudo apt-get install -y python-pifacecad pifacecommon
+sudo apt-get install -y python-pifacecad python-pifacecommon
 
 # Enable SPI module
 sudo modprobe spi-bmc2708
