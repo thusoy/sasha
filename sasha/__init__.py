@@ -43,6 +43,8 @@ class Client(object):
         with open(config_file) as config_fh:
             props = json.load(config_fh)
 
+        self.subscribe_to = propps.get('subscribe_to', [])
+
         self.unit_type = props['unit_type']
         self.checkin_frequency = props['checkin_frequency']
 
@@ -75,7 +77,8 @@ class Client(object):
             'actuators': [{
                 'id': interface,
                 'data': value.describe()
-                } for interface, value in self.actuators.items()]
+                } for interface, value in self.actuators.items()],
+            'subscribe_to': self.subscribe_to,
         }
 
         headers = {'Content-Type': 'application/json'}

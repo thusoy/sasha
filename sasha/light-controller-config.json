@@ -2,7 +2,7 @@
     "unit_type": "LIGHT_CONTROLLER",
     "checkin_frequency": 10,
     "client_class": "sasha.LightBulbClient",
-    "subscribe": [
+    "subscribe_to": [
         "LIGHT_BULB"
     ]
 }
