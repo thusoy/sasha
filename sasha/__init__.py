@@ -203,7 +203,7 @@ class LightBulbClient(Client):
 
     def broadcast_light_change(self):
         """Message all associated light bulbs to turn on / off based on parameter light_on"""
-        payoad = {
+        payload = {
             "action": "SET-LIGHT",
             "kwargs": {
                 "light_on": bool(self.light_on)
@@ -214,7 +214,7 @@ class LightBulbClient(Client):
         print "[info]\tturning associated light bulbs %s..." % ("on" if self.light_on else "off")
         for light_bulb in self.light_bulbs:
             try:
-                requests.post(light_bulb, data=json.dumps(payoad), headers=headers, timeout=2)
+                requests.post(light_bulb, data=json.dumps(payload), headers=headers, timeout=2)
                 print "[info]\tSET_LIGHT success for %s" % light_bulb
             except requests.exceptions.Timeout:
                 print "[error]\tSET_LIGHT timeout for %s" % light_bulb
@@ -238,10 +238,10 @@ class LightBulbClient(Client):
         }
         headers = {'Content-Type': 'application/json'}
 
-        print "[info]\tturning associated light bulbs %s..." % ("on" if self.light_on else "off")
+        print "[info]\tsending %s to associated light bulbs..." % action
         for light_bulb in self.light_bulbs:
             try:
-                requests.post(light_bulb, data=json.dumps(payoad), headers=headers, timeout=2)
+                requests.post(light_bulb, data=json.dumps(payload), headers=headers, timeout=2)
                 print "[info]\t%s success for %s" % (action, light_bulb)
             except requests.exceptions.Timeout:
                 print "[error]\t%s timeout for %s" % (action, light_bulb)
@@ -299,14 +299,14 @@ class LightBulbClient(Client):
 
     def buzz(self):
         """Message all associated light bulbs to turn on / off based on parameter light_on"""
-        payoad = {
+        payload = {
             "action": "BUZZ",
         }
         headers = {'Content-Type': 'application/json'}
         print "[info]\tBuzzing on associated light bulbs..."
         for buzzer in self.buzzers:
             try:
-                requests.post(buzzer, data=json.dumps(payoad), headers=headers, timeout=2)
+                requests.post(buzzer, data=json.dumps(payload), headers=headers, timeout=2)
                 print "[info]\tBUZZ success for %s" % buzzer
             except requests.exceptions.Timeout:
                 print "[error]\tBUZZ timeout for %s" % buzzer
