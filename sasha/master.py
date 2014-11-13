@@ -71,6 +71,11 @@ class Unit(db.Model):
         }
 
 
+class Subscription(db.Model):
+    type = db.Column(db.String(30), primary_key=True)
+    subscribers = db.Column(db.Text())
+
+
 class SensorReading(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
@@ -85,6 +90,7 @@ def register_unit():
     unit_type = posted_data.get('unit_type')
     sensors = posted_data.get('sensors', [])
     actuators = posted_data.get('actuators', [])
+    subscribe_to = posted_data.get('subscribe_to', [])
     print json.dumps(posted_data, indent=2)
     if not (csr and unit_type):
         abort(400)
@@ -96,6 +102,7 @@ def register_unit():
                 'message': 'You have been rejected.'
                 }), 403
     else:
+        # New unit registered
         unit = Unit(
             unit_type=unit_type,
             certificate=csr,
@@ -104,6 +111,19 @@ def register_unit():
         )
         db.session.add(unit)
         db.session.commit()
+        print 'Adding new unit, subscribing to %s' % subscribe_to
+        for unit_type_subscription in subscribe_to:
+            subscription = Subscription.query.get(unit_type_subscription)
+            if subscription:
+                subscription.subscribers = json.dumps(json.loads(subscription.subscribers) + [unit.id])
+                print 'Updated subscriptions, %s is now followed by %s' % (
+                    unit_type_subscription, ', '.join(str(i) for i in json.loads(subscription.subscribers)))
+            else:
+                subscription = Subscription(type=unit_type_subscription, subscribers=json.dumps([unit.id]))
+                print 'Created new subscription, %s now follows %s' % (unit.id, unit_type_subscription)
+                db.session.add(subscription)
+        db.session.commit()
+
     return jsonify({
         'id': unit.id,
         'checkin_url': url_for('unit_checkin', _external=True),
@@ -155,10 +175,25 @@ def unit_checkin():
     if not unit_id:
         abort(400)
     unit = Unit.query.get_or_404(unit_id)
-    if unit.state == 'not-approved':
+    if unit.state == 'not-approved' or unit.state == 'rejected':
         abort(400)
     if unit.ip != unit_ip or not unit.last_checkin or unit.state == 'gone':
         changes = True
+    if not unit.last_checkin:
+        # First checkin for this unit, notify subscribers
+        subscription = Subscription.query.get(unit.unit_type)
+        if subscription:
+            listeners_that_still_exist = []
+            for listener_id in json.loads(subscription.subscribers):
+                listener = Unit.query.get(listener_id)
+                if listener:
+                    # TODO: this code is going to act weird if there's several subscribers, should just choose the first one
+                    unit.associated_to_id = listener_id
+                    print 'Notifying %s about new %s unit %s' % (listener.alias or listener.id, unit.unit_type, unit.id)
+                    notify_single_unit_of_registry_update(listener)
+                    listeners_that_still_exist.append(listener_id)
+            subscription.subscribers = json.dumps(listeners_that_still_exist)
+            db.session.commit()
     unit.ip = unit_ip
     if unit.state == 'gone':
         print 'Unit %d (%s) is back up!' % (unit.id, unit.alias)
@@ -176,14 +211,19 @@ def notify_units_of_registry_update():
     units = Unit.query.filter(Unit.state=='ok').all()
     headers = {'content-type': 'application/json'}
     for unit in units:
-        try:
-            target = 'http://%s/registry-updated' % unit.ip
-            print('Notifying %s notified of registry update' % target)
-            requests.post(target, data=json.dumps({
-                'units': [u.to_json() for u in unit.associates],
-            }), timeout=1, headers={'content-type': 'application/json'})
-        except requests.exceptions.Timeout, requests.exceptions.ConnectionError:
-            print('Unit %s does not respond to registry update, skipping...' % unit.id)
+        notify_single_unit_of_registry_update(unit)
+
+
+def notify_single_unit_of_registry_update(unit):
+    try:
+        target = 'http://%s/registry-updated' % unit.ip
+        print('Notifying %s notified of registry update' % target)
+        requests.post(target, data=json.dumps({
+            'units': [u.to_json() for u in unit.associates],
+        }), timeout=1, headers={'content-type': 'application/json'})
+    except requests.exceptions.Timeout, requests.exceptions.ConnectionError:
+        print('Unit %s does not respond to registry update, skipping...' % unit.id)
+
 
 
 
