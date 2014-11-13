@@ -330,9 +330,6 @@ def parse_args():
     parser.add_argument('-c', '--config',
         metavar='<config-file>',
         default='config.json')
-    parser.add_argument('-s', '--setup',
-        action='store_true',
-        help='Whether to register against master first or not')
     return parser.parse_args()
 
 
@@ -344,13 +341,10 @@ def main():
         client_class = load_class_from_module(client_class_name)
     client = client_class(args.master, args.config)
 
-    # Run setup if desired
-    if args.setup:
-        client.setup()
-    else:
-        checkin = threading.Thread(target=client.do_checkins)
+    client.setup()
+    checkin = threading.Thread(target=client.do_checkins)
 
-        checkin.start()
-        client.app.run(port=80, host='0.0.0.0', debug=True)
-        client.terminate = True
-        client.tear_down()
+    checkin.start()
+    client.app.run(port=80, host='0.0.0.0', debug=True)
+    client.terminate = True
+    client.tear_down()
