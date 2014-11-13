@@ -28,7 +28,7 @@ sudo ./sasha/sasha/genkeys.sh
 
 # Run bootstrapping with master
 echo "Associating with master $1..."
-sudo sasha $1 --setup
+sudo sasha $1 --setup -c $2
 
 sudo sh -c "cat > /etc/init/sasha.conf <<EOF
 description \"Sasha client daemon\"
