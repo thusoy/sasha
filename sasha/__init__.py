@@ -298,6 +298,9 @@ def parse_args():
     parser.add_argument('-c', '--config',
         metavar='<config-file>',
         default='config.json')
+    parser.add_argument('-s', '--setup',
+        action='store_true',
+        help='Whether to register against master first or not')
     return parser.parse_args()
 
 
@@ -308,7 +311,11 @@ def main():
         client_class_name = config.get('client_class', 'sasha.Client')
         client_class = load_class_from_module(client_class_name)
     client = client_class(args.master, args.config)
-    client.setup()
+
+    # Run setup if desired
+    if args.setup:
+        client.setup()
+
     checkin = threading.Thread(target=client.do_checkins)
 
     checkin.start()
