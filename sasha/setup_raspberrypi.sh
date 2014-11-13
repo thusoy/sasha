@@ -26,18 +26,6 @@ sudo pip install -e ./sasha
 # Generate private- and public keys
 sudo ./sasha/sasha/genkeys.sh
 
-# Install PiFace
-sudo apt-get install -y python-pifacecad python-pifacecommon
-
-# Enable SPI module
-sudo modprobe spi-bmc2708
-
-# Start the sysinfo service
-sudo service pifacecafsysinfo start
-
-# Enable service to run at boot
-sudo update-rc.d pifacecadsysinfo defaults
-
 # Run bootstrapping with master
 echo "Associating with master $1..."
 sudo sasha $1 --setup
