@@ -90,7 +90,7 @@ class LightBulbActuator(Actuator):
         """Set current light bulb to the light bulb to the left of the current light bulb"""
 
         GPIO.output(self.leds[self.current_led], False)
-        self.current_led = (self.current_led - 1) % len(self.leds)
+        self.current_led = (self.current_led + 1) % len(self.leds)
         GPIO.output(self.leds[self.current_led], self.light_on)
         print "Led shifted left"
 
@@ -99,7 +99,7 @@ class LightBulbActuator(Actuator):
         """Set current light bulb to the light bulb to the left of the current light bulb"""
 
         GPIO.output(self.leds[self.current_led], False)
-        self.current_led = (self.current_led + 1) % len(self.leds)
+        self.current_led = (self.current_led - 1) % len(self.leds)
         GPIO.output(self.leds[self.current_led], self.light_on)
         print "Led shifted right"
 
