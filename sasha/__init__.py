@@ -347,10 +347,10 @@ def main():
     # Run setup if desired
     if args.setup:
         client.setup()
+    else:
+        checkin = threading.Thread(target=client.do_checkins)
 
-    checkin = threading.Thread(target=client.do_checkins)
-
-    checkin.start()
-    client.app.run(port=80, host='0.0.0.0', debug=True)
-    client.terminate = True
-    client.tear_down()
+        checkin.start()
+        client.app.run(port=80, host='0.0.0.0', debug=True)
+        client.terminate = True
+        client.tear_down()
