@@ -27,7 +27,7 @@ sudo pip install -e ./sasha
 sudo ./sasha/sasha/genkeys.sh
 
 # Install PiFace
-sudo apt-get install python-pifaced
+sudo apt-get install python-pifacecad
 
 sudo apt-get install pifacecommon
 
@@ -45,7 +45,7 @@ echo "Associating with master $1..."
 sudo sasha $1 --setup
 
 sudo sh -c "cat > /etc/init/sasha.conf <<EOF
-desription \"Sasha client daemon\"
+description \"Sasha client daemon\"
 
 start on (filesystem and net-device-up IFACE=lo)
 stop on runlevel [!2345]
