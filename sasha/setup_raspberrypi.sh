@@ -20,16 +20,14 @@ git clone https://github.com/thusoy/sasha
 
 # Install pip and requirements
 echo "Installing dependencies..."
-sudo apt-get install python-pip -y
+sudo apt-get install -y python-pip
 sudo pip install -e ./sasha
 
 # Generate private- and public keys
 sudo ./sasha/sasha/genkeys.sh
 
 # Install PiFace
-sudo apt-get install python-pifacecad
-
-sudo apt-get install pifacecommon
+sudo apt-get install -y python-pifacecad pifacecommon
 
 # Enable SPI module
 sudo modprobe spi-bmc2708
