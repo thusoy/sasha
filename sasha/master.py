@@ -288,6 +288,9 @@ def reject_unit(unit_id):
 
 @app.route('/certificates/<int:unit_id>.crt')
 def certificate(unit_id):
+    unit = Unit.query.get_or_404(unit_id)
+    if unit.state == 'rejected':
+        abort(410)
     return os.urandom(30).encode('hex')
 
 
