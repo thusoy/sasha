@@ -30,13 +30,13 @@
                 <input type="text" name="alias" value="{{ unit.alias }}" form="approve-unit-form-{{ loop.index }}">
             </td>
             <td>
-                <input type="text" name="description" value="{{ unit.description }}" form="apprive-unit-form-{{ loop.index }}">
+                <input type="text" name="description" value="{{ unit.description }}" form="approve-unit-form-{{ loop.index }}">
             </td>
             <td>{{ unit.ip }}</td>
             <td>{{ unit.certificate }}</td>
             <td>{{ unit.unit_type }}</td>
             <td>
-                <form method="post" action="{{ url_for('approve_unit', unit_id=unit.id) }}" class="form-inline" id="apprive-unit-form-{{ loop.index }}">
+                <form method="post" action="{{ url_for('approve_unit', unit_id=unit.id) }}" class="form-inline" id="approve-unit-form-{{ loop.index }}">
                     <input type="submit" value="Accept" class="btn btn-primary">
                 </form>
                 <form method="post" action="{{ url_for('reject_unit', unit_id=unit.id) }}" class="form-inline">
