@@ -90,6 +90,7 @@ def register_unit():
     unit_type = posted_data.get('unit_type')
     sensors = posted_data.get('sensors', [])
     actuators = posted_data.get('actuators', [])
+    description = posted_data.get('description', '')
     subscribe_to = posted_data.get('subscribe_to', [])
     print json.dumps(posted_data, indent=2)
     if not (csr and unit_type):
@@ -108,6 +109,7 @@ def register_unit():
             certificate=csr,
             sensors=json.dumps(sensors),
             actuators=json.dumps(actuators),
+            description=description,
         )
         db.session.add(unit)
         db.session.commit()
@@ -248,6 +250,8 @@ def delete_unit(unit_id):
 @app.route('/approve-unit/<int:unit_id>', methods=['POST'])
 def approve_unit(unit_id):
     unit = Unit.query.get_or_404(unit_id)
+    unit.alias = request.form.get('alias', '')
+    unit.description = request.form.get('description', '')
     unit.state = 'approved'
     db.session.commit()
     flash('Accepted unit %s' % unit.id, 'info')
