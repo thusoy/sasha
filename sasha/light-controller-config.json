@@ -1,5 +1,6 @@
 {
     "unit_type": "LIGHT_CONTROLLER",
+    "description": "IM THA CONTROLLAR - I CONTROOOL!",
     "checkin_frequency": 10,
     "client_class": "sasha.LightBulbClient",
     "subscribe_to": [

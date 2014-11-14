@@ -44,6 +44,7 @@ class Client(object):
             props = json.load(config_fh)
 
         self.subscribe_to = props.get('subscribe_to', [])
+        self.description = props.get('description', '')
 
         self.unit_type = props['unit_type']
         self.checkin_frequency = props['checkin_frequency']
@@ -70,6 +71,7 @@ class Client(object):
         payload = {
             'unit_type': self.unit_type,
             'csr': csr,
+            'description': self.description,
             'sensors': [{
                 'id': interface,
                 'data': value.describe()

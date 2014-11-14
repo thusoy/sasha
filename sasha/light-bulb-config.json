@@ -1,5 +1,6 @@
 {
     "unit_type": "LIGHT_BULB",
+    "description": "Your friendly neighbour light bulb",
     "checkin_frequency": 10,
     "actuators": {
         "ac0": "sasha.interfaces.LightBulbActuator",
