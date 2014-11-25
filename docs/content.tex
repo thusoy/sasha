@@ -1,16 +1,22 @@
-\section{Introduction}
+\begin{abstract}
 
+We present a HTTP-based protocol called SASHA; a hybrid approach to home automation, with a focus on privacy and security. Communication is done mostly peer-to-peer, while configuration and management is done is done in a client/server manner. The system automatically and gracefully handles failures in units and network.
+
+\end{abstract}
+
+\section{Introduction}
 
 \subsection{Terminology}
 Partitioning in this document should be interpreted as for distributed systems, where it refers to a units being separated due to network failure. When we talk about HTTP we mean HTTP over TLS (HTTPS). An association is a mapping between two units, that only one of the units are aware of. A unit refers to any IP-connected device running SASHA-compliant code.
 
+\subsection{Overview}
 SASHA is a partition-tolerant, secure system for home automation over HTTP. New units can be added to the network by swiping it close to the "master" over NFC or other near-field network technology to acquire the networks domain and URLs. The unit then has to be approved by an end-user before access to other units is granted. Authentication is done using a PKI, with certificates being signed by the local master. The system handles dynamic IP allocation by the master keeping an up-to-date mapping between certificates and last seen IP for that certificate. Most communication between units is done peer-to-peer, the master is only involved for handling configuration changes and environment updates, or if a reported sensor value breaches a threshold for something to be done.
 
 Environment changes are notified in real-time to the relevant units from the master, and could be extended to also notify units returning from extended absence about changes since last check-in.
 
 \section{Design and Functionality}
 
-Our system has two different types of units. In the core there is the master, which keeps track of the other devices in the system. All units in the system is expected to be openly accessible from the Internet. The master is identified by its hostname, which might have a dynamically updated DNS record as its IP changes. The master is the central point of authentication, configuration and management of the units in the network, maintaining a registry of all authenticated units. The master exposes its functionality to the end user through a password-access limited web interface.
+SASHA has two different types of units. In the core there is the master, which keeps track of the other devices in the system. All units in the system is expected to be openly accessible from the Internet. The master is identified by its hostname, which might have a dynamically updated DNS record as its IP changes. The master is the central point of authentication, configuration and management of the units in the network, maintaining a registry of all authenticated units. The master exposes its functionality to the end user through a password-access limited web interface.
 
 The second type of units in SASHA are devices such as sensors and actuators. The relationship between this second type of unit and the master can be described as a client-server relation; the units are initially requesting the master for access to the system, and later performing check-in requests, containing information about their status. The master is collecting and processing this information. The units will check in to the master regularly with status updates. These updates messages serve as a means to get updated sensor data if the unit is a sensor, and to keep the unit's IP address in the registry updated. Additionally they act as a heartbeat, to let the master know when a unit has left the network or been unavailable for a longer period of time, so that the user can be notified and associated units to stop trying to communicate with it.
 
@@ -45,7 +51,7 @@ Our design features a secure discovery of new units. The security is based on th
 \begin{figure}[ht]
     \centering
     \includegraphics[width=1\textwidth]{swipe}\label{fig:swipe}
-    \caption{Swipe Association Protocol}
+    \caption{Messages passed in the Swipe Association Protocol. Note that the new unit will not be able to download its certificate until the user has approved it. After finishing this step, the unit continues with the operations depicted in \autoref{fig:authenticate-unit}.}
 \end{figure}
 
 The information exchange over the NFC channel is depicted in \autoref{fig:swipe}. In addition to the CSR required for future secure communication, the new device (client) communicates metadata, such as device type, available interfaces and a textual description of the device. The response is composed of three different URLs to be used by the client as soon as it is connected to the Internet.
@@ -61,7 +67,7 @@ The information exchange over the NFC channel is depicted in \autoref{fig:swipe}
     The registry URL allows the new device to query the registry, i.e. find information about all devices connected to the master. This will allow for more flexibility regarding peer-to-peer communication between devices, as all devices in theory are capable of browsing the entire registry.
 \end{description}
 
-After completing the Swipe Association protocol, the new device is awaiting an Internet connection before completing the bootstrap procedure. The master will fully acknowledge the new device when it has performed its first check-in after having been verified by the user, and seeing that the check-in was authenticated with the certificate signed by the master.
+After completing the Swipe Association, the new device is awaiting an Internet connection before completing the bootstrap procedure. The master will fully acknowledge the new device when it has performed its first check-in after having been verified by the user, and seeing that the check-in was authenticated with the certificate signed by the master.
 
 \subsection{HTTP Authenticate}
 Devices that have gone through the Swipe association will show up in the web interface served by the master, and thus allow the user to verify that the associated devices are indeed intended trusted. The signed certificate will not be generated and made available on the promised Certificate URL until the used manually approves the device through the web interface; requests to this URL will return 404 not found until the user has taken action.
