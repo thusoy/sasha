@@ -28,7 +28,7 @@ class Client(object):
         self.app = flask.Flask(__name__)
         self.unit_type = None
         self.checkin_frequency = None
-        self.priv_key = ".ssh/id_rsa"
+        self.priv_key = "/etc/sasha/privkey"
         self.certificate = None
 
         # setup url handlers
@@ -65,7 +65,7 @@ class Client(object):
 
 
     def setup(self):
-        with open(os.path.expanduser(os.path.join('~', '.ssh', 'id_rsa.csr'))) as csr_fh:
+        with open('/etc/sasha/csr.pem')) as csr_fh:
             csr = csr_fh.read()
 
         payload = {

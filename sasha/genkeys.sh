@@ -2,6 +2,15 @@
 
 set -e
 
-test -d ~/.ssh || mkdir ~/.ssh
-openssl req -nodes -newkey rsa:2048 -keyout ~/.ssh/id_rsa -out ~/.ssh/id_rsa.csr -subj "/C=/ST=/L=/O=sasha/OU=/CN=sasha.zza.no"
-openssl rsa -in ~/.ssh/id_rsa -pubout 2>/dev/null > ~/.ssh/id_rsa.pub
+if [ $(id -u) -ne 0 ]; then
+    echo "Need to be root to run this script!"
+    exit 1
+fi
+
+test -d /etc/sasha || mkdir /etc/sasha
+cd /etc/sasha
+echo "Creating EC key..."
+openssl ecparam -genkey -name prime256v1 -out privkey.pem
+chmod 400 privkey.pem
+echo "Generating CSR..."
+openssl req -new -nodes -key privkey.pem -out csr.pem -sha256 -subj "/C=/ST=/L=/O=sasha/OU=/CN=sasha.zza.no"
