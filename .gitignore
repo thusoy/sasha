@@ -55,3 +55,24 @@ target/
 
 db-dev.sqlite
 venv
+
+# Docs
+main.pdf
+main.log
+.vagrant
+*.acn
+*.acr
+*.alg
+*.aux
+*.bbl
+*.blg
+*.glg
+*.gls
+*.glo
+*.ist
+*.loa
+*.lof
+*.lot
+*.out
+*.toc
+*.xdy
