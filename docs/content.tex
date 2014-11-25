@@ -16,10 +16,13 @@ The second type of units in SASHA are devices such as sensors and actuators. The
 
 The connected units are defined by a hierarchy of types. The top level type indicates a set of capabilities that the unit is expected to have. These capabilities are fulfilled in the form of interfaces. Each of these interfaces are again identified by a type which defines the methods they expose, which can be sensor readings communicated during check-ins, or actuators that allow outside sources to instrument the unit to take specific actions, such as turning the light on, start playing a video, or open a door.
 
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=1\textwidth]{subscribe-messaging}\label{fig:subscribe-messaging}
+    \caption{SASHA Register Subscribe Pattern. Message \#1 is a DynDNS update record to keep the master hostname updated to the master's current IP. Message number 2 and 3 are both register messages, both only 2 contain subscription information. Message number 7 is a HTTP POST to one of Unit B's interfaces as configured in the master.}
+\end{figure}
 
-Figure XX: SASHA Register Subscribe Pattern. Message \#1 is a DynDNS update record to keep the master hostname updated to the master's current IP. Message number 2 and 3 are both register messages, both only 2 contain subscription information. Message number 7 is a HTTP POST to one of Unit B's interfaces as configured in the master.
-
-When all units have been authenticated and associations are set up, there are two forms of communication that will occur, besides the regular check in messages to the master. Something might occur to a unit's physical interfaces, such as motion detected by a camera, buttons being pressed or similar, and the unit will use the data about its associated units as received from the master to instruct them based on the event that occurred. This case is depicted in \autoref{figureXX}
+When all units have been authenticated and associations are set up, there are two forms of communication that will occur, besides the regular check in messages to the master. Something might occur to a unit's physical interfaces, such as motion detected by a camera, buttons being pressed or similar, and the unit will use the data about its associated units as received from the master to instruct them based on the event that occurred. This case is depicted in \autoref{fig:subscribe-messaging}.
 
 In the other case, the master has been configured with a rule, saying that if a given condition occurs, a set of devices should be sent an action, for example if a sensor detects temperatures below a given threshold, send an action to a set of units requesting them to turn on their heating elements.
 \section{Self-adaptiveness}
@@ -39,9 +42,13 @@ The design is also made so that the user never has to configure anything manuall
 \subsection{NFC Swipe Association}
 Our design features a secure discovery of new units. The security is based on the idea that each trusted unit will have a certificate signed by the master, which acts as a Certificate Authority. To achieve this, there is a requirement for a trusted channel to communicate the certificate request from a new device to the master. Our proposal for such communication channel is to use a near field communication (NFC) channel, that will allow the new device to send the certificate signing request (CSR) to the master, given that the device is at some point close in proximity to the master. In practice this would require the end-user to “swipe” the new device close to a NFC device associated to the master, to exchange the necessary information to bootstrap the device.
 
-Figure XX: Swipe Association Protocol
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1\textwidth]{swipe}\label{fig:swipe}
+    \caption{Swipe Association Protocol}
+\end{figure}
 
-The information exchange over the NFC channel is depicted in Figure XX. In addition to the CSR required for future secure communication, the new device (client) communicates metadata, such as device type, available interfaces and a textual description of the device. The response is composed of three different URLs to be used by the client as soon as it is connected to the Internet.
+The information exchange over the NFC channel is depicted in \autoref{fig:swipe}. In addition to the CSR required for future secure communication, the new device (client) communicates metadata, such as device type, available interfaces and a textual description of the device. The response is composed of three different URLs to be used by the client as soon as it is connected to the Internet.
 
 \begin{description}
 \item[Master certificate]
@@ -60,10 +67,13 @@ After completing the Swipe Association protocol, the new device is awaiting an I
 Devices that have gone through the Swipe association will show up in the web interface served by the master, and thus allow the user to verify that the associated devices are indeed intended trusted. The signed certificate will not be generated and made available on the promised Certificate URL until the used manually approves the device through the web interface; requests to this URL will return 404 not found until the user has taken action.
 The user have two possibilities; he can reject or approve the device. Approval means that a signed certificate will be made available, thus the device will no longer get a 404, but a 200 OK, and thus complete the bootstrap. Rejection means that requests to the certificate URL will return 410 Gone, thus instructing the device to stop its effort in trying to obtain a certificate, and thus end the bootstrap procedure.
 
-\begin{figure}[H]
+\begin{figure}[ht!]
     \centering
-    \includegraphics{}
-The message flow in these last steps of the bootstrap procedure is given in \autoref{Figure XX}. After a successful bootstrap, the device can communicate with the master over a communication channel that provides authentication, confidentiality and integrity.
+    \includegraphics[width=1\textwidth]{authenticate-unit}\label{fig:authenticate-unit}
+    \caption{Auth!}
+\end{figure}
+
+The message flow in these last steps of the bootstrap procedure is given in \autoref{fig:authenticate-unit}. After a successful bootstrap, the device can communicate with the master over a communication channel that provides authentication, confidentiality and integrity.
 \section{Justification of Design Choices}
 
 \subsection{HTTP}
