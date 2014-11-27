@@ -51,10 +51,10 @@ Our design features a secure discovery of new units. The security is based on th
 \begin{figure}[ht]
     \centering
     \includegraphics[width=1\textwidth]{swipe}\label{fig:swipe}
-    \caption{Messages passed in the Swipe Association Protocol. Note that the new unit will not be able to download its certificate until the user has approved it. After finishing this step, the unit continues with the operations depicted in \autoref{fig:authenticate-unit}.}
+    \caption{Messages passed in the Swipe Association Protocol. Note that the new unit will not be able to download its certificate until the user has approved it. After finishing this step, the unit continues with the operations depicted in~\autoref{fig:authenticate-unit}.}
 \end{figure}
 
-The information exchange over the NFC channel is depicted in \autoref{fig:swipe}. In addition to the CSR required for future secure communication, the new device (client) communicates metadata, such as device type, available interfaces and a textual description of the device. The response is composed of three different URLs to be used by the client as soon as it is connected to the Internet.
+The information exchange over the NFC channel is depicted in~\autoref{fig:swipe}. In addition to the CSR required for future secure communication, the new device (client) communicates metadata, such as device type, available interfaces and a textual description of the device. The response is composed of three different URLs to be used by the client as soon as it is connected to the Internet.
 
 \begin{description}
 \item[Master certificate]
@@ -79,7 +79,7 @@ The user have two possibilities; he can reject or approve the device. Approval m
     \caption{HTTP messages sent during the registration phase. The two cases illustrated are 1) where the user approves the new unit, and 2) the user rejects the new unit.}
 \end{figure}
 
-The message flow in these last steps of the bootstrap procedure is given in \autoref{fig:authenticate-unit}. After a successful bootstrap, the device can communicate with the master over a communication channel that provides authentication, confidentiality and integrity.
+The message flow in these last steps of the bootstrap procedure is given in~\autoref{fig:authenticate-unit}. After a successful bootstrap, the device can communicate with the master over a communication channel that provides authentication, confidentiality and integrity.
 \section{Justification of Design Choices}
 
 \subsection{HTTP}
@@ -105,19 +105,19 @@ A dynamic DNS requirement is not something that can be fulfilled by the parts by
 
 Now we'll discuss some other home automation tools and see how they compare to SASHA.
 
-ZigBee\cite{zigbee} is a wireless mesh network often used for sensors to report in to devices, designed for low-power low-rate communication. ZigBee complements SASHA and could co-exist, as sensors could report in wirelessly to controlling devices, which then reports in to the master. Since the sensors are not on a IP network directly, this poses little to no additional risk.
+ZigBee~\cite{zigbee} is a wireless mesh network often used for sensors to report in to devices, designed for low-power low-rate communication. ZigBee complements SASHA and could co-exist, as sensors could report in wirelessly to controlling devices, which then reports in to the master. Since the sensors are not on a IP network directly, this poses little to no additional risk.
 
-OSGi\cite{osgi} is a Java-specific framework, which only works on units that can run a Java VM. OSGi also doesn't seem to encrypt communication or ensure the identity of communicating parties, as their security layer only seems to make sure execution is limited to pre-defined modules. SASHA is a network-level standard that can be implemented in any language on any platform.
+OSGi~\cite{osgi} is a Java-specific framework, which only works on units that can run a Java VM. OSGi also doesn't seem to encrypt communication or ensure the identity of communicating parties, as their security layer only seems to make sure execution is limited to pre-defined modules. SASHA is a network-level standard that can be implemented in any language on any platform.
 
-Z-Wave\cite{z-wave} is another mesh network technology, operating on 900Mhz. Z-Wave does not seem tailored to Internet of Things, where every unit has an IP address. Since Z-Wave doesn't have any central point, there's also no authentication of new devices, so the setup is relatively easy infiltrate for an attacker.
+Z-Wave~\cite[Annex~A]{z-wave} is another mesh network technology, operating on 900Mhz. Z-Wave does not seem tailored to Internet of Things, where every unit has an IP address. Since Z-Wave doesn't have any central point, there's also no authentication of new devices, so the setup is relatively easy infiltrate for an attacker.
 
 INSTEON is yet another wireless mesh networking technology, which also due to its mesh nature and employs no authentication or end-to-end encryption, and would also be limited to devices in close physical proximity. SASHA is completely independent tn physical proximity and can control any device connected to the Internet, whether in the next room or on a different continent.
 
-The IETF is working on standardizing formats for Internet of Things, one of the formats they're working on, SenML \cite{senml}, is a format for reporting sensor values to other devices. This is quite similar to how our sensors report values to the master, or could perhaps be utilized over ZigBee to have wireless sensors without an IP to report to a connected unit.
+The IETF is working on standardizing formats for Internet of Things, one of the formats they're working on, SenML~\cite{senml}, is a format for reporting sensor values to other devices. This is quite similar to how our sensors report values to the master, or could perhaps be utilized over ZigBee to have wireless sensors without an IP to report to a connected unit.
 
 In researching the other solutions it appears that many of the units produced today are made to one specific networking technology, which isn't exactly in the Internet spirit of heterogeneous units communicating over lots of different interfaces and technologies. Basing communication to IP networks like SASHA does makes it possible for a device vendor to comply to multiple different standards and not locking the user in to one specific solution. There also seems to be none of the other solutions that take authentication and security seriously, which absolutely should be taken into account with all the sensitive data flowing through a home automation network.
 
-For a more through comparison of INSTEON, Z-Wave and other networking technologies, we refer the reader to the 2010 report by Gomez and Paradells \cite{comparison-of-technologies}.
+For a more through comparison of INSTEON, Z-Wave and other networking technologies, we refer the reader to the 2010 report by Gomez and Paradells~\cite{comparison-of-technologies}.
 
 \section{Security Considerations}
 

@@ -1,22 +1,23 @@
-\documentclass{article}
+\documentclass{scrartcl}
 
 % this package is just to generate text for demo-purposes
 \usepackage{blindtext}
 \usepackage{todonotes}
 \usepackage{hyperref}
 
-
-\title{TTM3: SASHA} % The title of your assignement; NB use \newlinetitle to start a newline
-%\subtitle{Self Adaptive System for Home Automation}
-\author{Tarjei Husøy, Martin Kirkholt Melhus} % Your firstname and lastname
-%\professor{Rolf Bræk, ITEM} % Affiliation = ITEM for instance
-
 \DeclareGraphicsExtensions{.pdf,.jpg,.png}
 \graphicspath{{./figs/}}
 
 \begin{document}
-
 \pagenumbering{arabic}
+
+\title{TTM3: SASHA} % The title of your assignement; NB use \newlinetitle to start a newline
+\subtitle{Self Adaptive System for Home Automation}
+\author{Tarjei Husøy, Martin Kirkholt Melhus} % Your firstname and lastname
+%\professor{Rolf Bræk, ITEM} % Affiliation = ITEM for instance
+
+\maketitle
+
 \include{content}
 
 %\renewcommand*{main}{References}
