@@ -5,6 +5,9 @@ DEMO
 * Koble til kontrolleren, se hvordan den dukker opp og kan godkjennes
 * Koble til en lyspære, vise hvordan subscribe sørger for at den blir auto-assosiert med kontrolleren
 * Demonstere at bindingen mellom kontroller og lyspære fungerer
+    * Demonstrer forskjellige interfaces
+    * Nevne pubsub arkitektur
+    * Nevne hybrid-arkitektur hvor master kan handle på vegne av sensor-formler
 * Koble til ny lyspære, se at kontrolleren kan styre flere
 * Koble fra den første lyspæra, for å vise hvordan masteren legger merke til enheter som er offline
 * Koble lyspæren til igjen, for å se hvordan den dukker opp igjen
