@@ -65,7 +65,7 @@ class Client(object):
 
 
     def setup(self):
-        with open('/etc/sasha/csr.pem')) as csr_fh:
+        with open('/etc/sasha/csr.pem') as csr_fh:
             csr = csr_fh.read()
 
         payload = {
