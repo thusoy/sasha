@@ -1,6 +1,6 @@
 \begin{abstract}
 
-We present a HTTP-based protocol called SASHA; a hybrid approach to home automation, with a focus on privacy and security. Communication in general is done peer-to-peer, while configuration and management is done in a client/server manner. The system is extensible, and in addition it automatically and gracefully handles failures in units and network.
+We present a HTTP-based Self Adaptive System for Home Automation (SASHA); a hybrid approach to home automation, with a focus on privacy and security. Communication in general is done peer-to-peer, while configuration and management is done in a client/server manner. The system is extensible, and in addition it automatically and gracefully handles failures in units and network.
 
 \end{abstract}
 
@@ -27,7 +27,7 @@ The connected units are defined by a hierarchy of types. The top level type indi
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=1\textwidth]{subscribe-messaging}
-    \caption{SASHA Register Subscribe Pattern. Message number 1 is a DynDNS update record to keep the master hostname updated to the master's current IP. Message number 2 and 3 are both register messages, both only 2 contain subscription information. Message number 7 is a HTTP POST to one of Unit B's interfaces as configured in the master.}
+    \caption{SASHA Register Subscribe Pattern. Message number 1 is a DynDNS update record to keep the master hostname updated to the master's current IP. Message number 2 and 3 are both register messages, but only message 2 contains subscription information. Message number 7 is a HTTP POST to one of Unit B's interfaces as configured in the master.}
     \label{fig:subscribe-messaging}
 \end{figure}
 
@@ -95,7 +95,7 @@ The message flow in these last steps of the bootstrap procedure is given in~\aut
 \subsection{HTTP}
 The reason for choosing HTTP as our transport protocol boils down to not wanting to reinvent the wheel, when it comes to routing and content negotiation. We utilize the routing features of HTTP to address the different interfaces a unit might provide, and flexible units might use the content-negotiation features provided by HTTP to reply in either JSON, msgpack, XML or others. HTTP also offers content encoding negotiation. Also part of the consideration is framework support, no matter what language you choose to implement your SASHA client in, you'll find several choices for HTTP libraries you might use.
 
-One consideration about HTTP, and especially HTTP over TLS, is message delay. Many home automation use cases have strict requirements for maximum perceptible delay for the user, f. ex turning on lights. HTTPS requires first a three-way TCP handshake, then a content-negotiation and certificate exchange between communicating parties, before the actual HTTP body can be transmitted. We haven't tested the actual delay you'd get in this setup, but if it turns out to be too large to be practical this could be optimized by the initiating unit always keeping an established TLS connection to associated units, and thus avoiding the handshake phase when data needs to be transmitted. The connections can be established either on first use if there's lots of associated units, or could be established upon the first registry update from the master with the unit's IP if there's few enough associates to keep all the connections around.
+One consideration about HTTP, and especially HTTP over TLS, is message delay. Many home automation use cases have strict requirements for maximum perceptible delay for the user, e.g. turning on lights. HTTPS requires first a three-way TCP handshake, then a content-negotiation and certificate exchange between communicating parties, before the actual HTTP body can be transmitted. We haven't tested the actual delay you'd get in this setup, but if it turns out to be too large to be practical this could be optimized by the initiating unit always keeping an established TLS connection to associated units, and thus avoiding the handshake phase when data needs to be transmitted. The connections can be established either on first use if there's lots of associated units, or could be established upon the first registry update from the master with the unit's IP if there's few enough associates to keep all the connections around.
 
 \subsection{NFC}
 NFC was chosen mostly as an example protocol suitable for close-field communication, since the closeness and direct communication makes it much harder to compromise this channel. If the initial setup was done over the Internet, a clever attacker could perform a Man-in-the-Middle attack on the association, and thus gaining access to your network internals.
