@@ -61,7 +61,7 @@ Note that the usage of NFC to complete the master handshake is not necessary, th
 \begin{figure}[ht]
     \centering
     \includegraphics[width=1\textwidth]{swipe}
-    \caption{Messages passed in the initial handshake. Note that the new unit will not be able to download its certificate until the user has approved it. After finishing this step, the unit continues with the operations depicted in~\autoref{fig:authenticate-unit}.}
+    \caption{Messages passed in the initial handshake. The new unit will not be able to download its certificate until the user has approved it. After finishing this step, the unit continues with the operations depicted in~\autoref{fig:authenticate-unit}. Note that the last message also contains the master's certificate.}
     \label{fig:swipe}
 \end{figure}
 
@@ -78,7 +78,7 @@ The information exchanged over the NFC channel is depicted in \autoref{fig:swipe
 
 After completing the handshake, the new device is awaiting an Internet connection before completing the bootstrap procedure. The master will fully acknowledge the new device when it has performed its first check-in after having been verified by the user, and seeing that the check-in was authenticated with the certificate signed by the master.
 
-\subsection{Certificate retrieval}
+\subsection{Certificate Retrieval}
 Devices that have gone through the handshake will show up in the web interface served by the master, and thus allow the user to verify that the associated devices are indeed intended to be trusted. The signed certificate will not be generated and made available on the promised Certificate URL until the used manually approves the device through the web interface; requests to this URL will return 404 not found until the user has taken action.
 The user have two possibilities; he can reject or approve the device. Approval means that a signed certificate will be made available, thus the device will no longer get a 404, but a 200 OK, and thus complete the bootstrap. Rejection means that requests to the certificate URL will return 410 Gone, instructing the device to stop its effort to try to obtain a certificate, and thus end the bootstrap procedure.
 
