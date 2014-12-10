@@ -86,7 +86,7 @@
             <td>
                 <form method="post" action="{{ url_for('connect_units') }}">
                     <input type="hidden" value="{{ unit.id }}" name="unit_id">
-                    <select style="width: 140px" name="other_unit">
+                    <select style="width: 140px" name="other_unit" autocomplete="off">
                         <option value="">None</option>
                         {% for other_unit in operational_units if other_unit.id != unit.id %}
                             <option value="{{ other_unit.id }}" {{ 'selected' if other_unit.id == unit.associated_to_id }}>{{ other_unit.alias }}</option>
